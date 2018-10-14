@@ -13,14 +13,25 @@
 	<div id="likert" class="invisible">
 		How well do you hear the sound? 
 		<button id="likert_not_at_all_button" type="button" class="buttonOff" onclick="likertButtonClicked(this, 0)">Not at all</button>
-		<button id="likert_neutral_button" type="button" class="buttonOff" onclick="likertButtonClicked(this, 1)">Neutral</button>
-		<button id="likert_very_good_button" type="button" class="buttonOff" onclick="likertButtonClicked(this, 2)">Very good</button>
+        <button id="likert_poor_button" type="button" class="buttonOff" onclick="likertButtonClicked(this, 1)">Poor</button>
+		<button id="likert_neutral_button" type="button" class="buttonOff" onclick="likertButtonClicked(this, 2)">Neutral</button>
+		<button id="likert_decent_button" type="button" class="buttonOff" onclick="likertButtonClicked(this, 3)">Decent</button>
+		<button id="likert_very_good_button" type="button" class="buttonOff" onclick="likertButtonClicked(this, 4)">Very good</button>
+        
 		<button id="next_file_button" type="button" onclick="newTestFile()">Next sound</button>
         <button id="play_sound_button" type="button" onclick="playSound()">Play sound</button>
+        
+        <audio controls id="likert_audio" class="invisible">
+          <source src="Aestethics_3.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+        </audio> 
+        
         <button id="show_results" type="button" onclick="stateSwitch('show results')">Show results</button>
 	</div>
 	<div id="results" class="invisible">
-		Results will be posted here soon.... (press space to finish test)
+        <text id="how to change text in html"></text>
+        <div id="results_table">
+        </div>
 	</div>
 </body>
 </html>
