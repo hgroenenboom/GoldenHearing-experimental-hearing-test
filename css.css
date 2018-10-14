@@ -1,0 +1,15 @@
+.buttonOff {
+	background-color: darkgrey;
+}
+
+.buttonOn {
+	background-color: green;
+}
+
+.invisible {
+	visibility: hidden;
+}
+
+.visible {
+	visibility: visible;
+}
