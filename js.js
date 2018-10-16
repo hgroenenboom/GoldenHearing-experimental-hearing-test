@@ -242,7 +242,7 @@ function nextTest(override = false) {
 	}
 	if(isAButtonToggled || override) {
 		// random audio and soundfile
-		instrument.frequency = 10+20*Math.random(30, 60);
+		instrument.frequency = 15+15*Math.random(30, 60);
 		chosenAudio = Math.floor(Math.random() * instrumentPaths.length);
 		instrument.selectedAudio = chosenAudio;
 		ambience.selectedAudio = chosenAudio;
@@ -306,9 +306,9 @@ function Sound(whichPartOfBuffer) {
 	}
 }
 
+likertList = ["Not good", "Poor", "Neutral", "Decent", "Good"];
 function drawTable() {
     
-    likertList = ["Not good", "Poor", "Neutral", "Decent", "Good"];
     //document.getElementById("how to change text in html").innerHTML = "nieuwe text";
 
     data = "All data: ["
@@ -369,10 +369,63 @@ function drawTable() {
     tbl.setAttribute("border", "2");
 	
 	
-    drawGraph(dataForGraph);
+    drawGraph(results);
 }
 
 function drawGraph(dat) {
+	// dat[0] = rating, dat[1] = freq, dat[2] = instrument
+	console.log(dat);
+	datPia = [];
+	datSna = [];
+	datWoo = [];
+	allData = [];
+	
+	for(var i = 0; i < dat.length; i++) {
+		var dataP = [dat[i][0], dat[i][1]];
+		switch (dat[i][2]) {
+			case 0:
+				datPia.push(dataP);
+				break;
+			case 1:
+				datSna.push(dataP);
+				break;
+			case 2:
+				datWoo.push(dataP);
+				break;
+		}
+		allData.push(dataP);
+	}
+	
+	var getAveraged = function(data) {
+		newData = [];
+		for(var v = 0; v < likertList.length; v++) {
+			count = 0;
+			addedFrequencies = 0;
+			for(var i = 0; i < data.length; i++) {
+				if(data[i][0] == v) {
+					addedFrequencies += data[i][1];
+					count++;
+				}
+			}
+			if(count != 0) {
+				newData.push(addedFrequencies/count);
+			} else {
+				newData.push(0);
+			}
+		}
+		return newData;
+	}
+	
+	allData = getAveraged(allData);
+	datPia = getAveraged(datPia);
+	datSna = getAveraged(datSna);
+	datWoo = getAveraged(datWoo);
+	
+	console.log(allData);
+	console.log(datPia);
+	console.log(datSna);
+	console.log(datWoo);
+	
     //var Chart = require('chart.js'); 
 	Chart.defaults.global.elements.line.fill = false;
     var c = new Chart(document.getElementById("myChart"), {
@@ -380,10 +433,27 @@ function drawGraph(dat) {
         data: {
             labels: [0,1,2,3,4],
             datasets: [{
-                label: 'Distinguishability',
-                data: dat,
+                label: 'Piano',
+                data: datPia,
+				borderColor: "#3e95cd",
                 borderWidth: 1
-            }]
+            }, {
+                label: 'Snare',
+                data: datSna,
+				borderColor: "#8e5ea2",
+                borderWidth: 1
+            }, {
+                label: 'Woodblock',
+                data: datWoo,
+				borderColor: "#3cba9f",
+                borderWidth: 1
+            }, {
+                label: 'Average',
+                data: allData,
+				borderColor: "#000000",
+                borderWidth: 1
+            }
+			]
         },
         options: {
             scales: {
