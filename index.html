@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<link rel="stylesheet" href="css.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="Chart.bundle.js"></script>
+	<script src="Chart.bundle.min.js"></script>
+	<script src="SoundPlayer.js"></script>
+	<script type="text/javascript" src="js.js"></script>
+	<title>Hearing test</title>
+</head>
+<body>
+	<div id="startscreen" class="visible centered" onclick="stateSwitch(this)">
+		Click space to continue
+	</div>
+	<div id="likert" class="invisible likert centered">
+		<div>
+			<p>How well do you hear the sound? </p>
+			<div id="likertbuttons" style="top:100px,height=300px,position=relative">
+				<button id="likert_not_at_all_button" type="button" class="buttonOff" onclick="likertButtonClicked(this, 0)">Not at all</button>
+				<button id="likert_poor_button" type="button" class="buttonOff" onclick="likertButtonClicked(this, 1)">Poor</button>
+				<button id="likert_neutral_button" type="button" class="buttonOff" onclick="likertButtonClicked(this, 2)">Neutral</button>
+				<button id="likert_decent_button" type="button" class="buttonOff" onclick="likertButtonClicked(this, 3)">Decent</button>
+				<button id="likert_very_good_button" type="button" class="buttonOff" onclick="likertButtonClicked(this, 4)">Very good</button>
+			</div>
+			
+			<div class="bottomhalf">
+				<button id="next_file_button" type="button" onclick="nextTest()">Next sound</button>
+				<button id="play_sound_button" type="button" onclick="instrument.togglePlayback(buffers, 3, true);ambience.togglePlayback(buffers, 3, true)">Stop sound</button>
+				
+				<audio id="likert_audio_control" class="invisible">
+				Your browser does not support the audio element.
+				</audio> 
+				
+				<input type="range" id="volume" class="control-volume" min="0" max="2" value="1" list="gain-vals" step="0.01" data-action="volume" />
+				
+				<button id="show_results" type="button" onclick="stateSwitch('show results')">Show results</button>
+			</div>
+		</div>
+	</div>
+	<div id="results" class="invisible results">
+		<div>
+			<text id="how_to_change_text_in_html" class="topleftinbox"></text>
+			<div id="results_table" class="toprightinbox">
+			</div>
+		</div>
+        <canvas id="myChart" width="200" height="100" class="bottomhalf">
+			<p>Hello Fallback World</p>
+		</canvas>
+	</div>
+</body>
+</html>

@@ -1,11 +1,133 @@
-// $(document).ready(function(){
-   // document.body.onkeydown = stateSwitch;
-// });
+// get context
+const AudioContext = window.AudioContext || window.webkitAudioContext;
+const audioCtx = new AudioContext();
 
+// dsp modules
+const gainNode = audioCtx.createGain();
+
+var instrumentPaths = [
+	["https://studentdav.hku.nl/public_html/hearingtest/audio/Impulse.mp3", "audio/mpeg"], 
+	["https://studentdav.hku.nl/public_html/hearingtest/audio/Impulse_h.mp3"],
+];
+var ambiencePaths = [
+	["https://studentdav.hku.nl/public_html/hearingtest/audio/Aestethics_3.mp3", "audio/wav", "audio/mpeg"], 
+	["https://studentdav.hku.nl/public_html/hearingtest/audio/Aestethics_3_h.mp3", "audio/wav"],
+];
+var buffers = [];
+// var instrumentBuffers = [];
+// var ambienceBuffers = [];
+
+var loadingProcessIdentifiers = [0];
+var loadingProcess = [0];
+loadingProcess.length = instrumentPaths.length*2;
+loadingProcessIdentifiers.length = instrumentPaths.length*2;
+
+// saving all results
+var numResults = 0;
+var activeButtonNum = null; // currently active likert button
+var results = []; 
+var chosenAudio = 0;
+var instrument = new Sound(0);
+var ambience = new Sound(1);
+
+$(document).ready(function(){
+	jQuery("#startscreen")[0].innerHTML = "please wait till all audio has been loaded";
+	
+	var allPaths = instrumentPaths.concat(ambiencePaths);
+	buffers = getSoundBuffers(allPaths);
+});
+
+function documentReadyPart2() {
+	jQuery("#startscreen")[0].innerHTML = "Press space to continue";
+	
+	// initiate audio elements
+    audioElement = document.querySelector("audio");
+	
+	const track = audioCtx.createMediaElementSource(audioElement);
+	const volumeControl = document.querySelector('[data-action="volume"]');
+	volumeControl.addEventListener('input', function() {
+		gainNode.gain.value = this.value;
+	}, false);
+	track.connect(gainNode).connect(audioCtx.destination);
+	
+	// start audio - necessary?
+	audioCtx.resume();
+	
+	// console.log(buffers);
+	// var half_length = ambiencePaths.length;    
+	// instrumentBuffers = buffers.slice(0,half_length);
+	// ambienceBuffers = buffers.slice(half_length,half_length+half_length);
+	// console.log(buffers.slice(half_length,half_length+half_length));
+	// console.log(buffers);
+	
+	// console.log("instrumentBuffers: ");
+	// console.log(instrumentBuffers);
+	// console.log("ambienceBuffers: ");
+	// console.log(ambienceBuffers);
+}
+
+function getSoundBuffers(soundPaths) {
+	var buffers = [];
+	var isDone = [];
+	buffers.length = soundPaths.length;
+	
+	var request = null;
+	for(var i = 0; i < soundPaths.length; i++) {
+		isDone.push(false);
+		loadingProcessIdentifiers[i] = soundPaths[i][0];
+		
+		request = new XMLHttpRequest();
+		request.open('GET', soundPaths[i][0], true);
+		request.responseType = 'arraybuffer';
+		
+		var showProcess = function (e) {			
+			var n = loadingProcessIdentifiers.indexOf(e.originalTarget.responseURL);
+			
+			var text = "audioLoadingProcess";
+			if( document.getElementById(text) == null ) {
+				$( "<div id='"+text+"'></div>" ).appendTo( jQuery("#startscreen") );
+			} 
+			
+			loadingProcess[n] = e.loaded / e.total * 100 / (instrumentPaths.length*2);
+			
+			var total = 0
+			for(var j = 0; j < loadingProcess.length; j++) {
+				total += loadingProcess[j];
+			}
+			document.getElementById(text).innerHTML = "loading: "+total+"%";
+		}
+		
+		request.addEventListener("load", function (e){console.log("\trequest-load");});
+		request.addEventListener("error", function (e) {console.log("\trequest-error");});
+		request.addEventListener("abort", function (e) {console.log("\trequest-abort");});
+		request.addEventListener("progress", showProcess);
+		
+		request.onload = function() {
+			var n = loadingProcessIdentifiers.indexOf(this.responseURL);
+			var audioData = this.response;
+			audioCtx.decodeAudioData(audioData, function(buffer) {
+				buffers[n] = buffer;
+			}, function(e){"Error with decoding audio data" + e.error});
+			
+			// check if all buffers are loaded
+			isDone[n] = true;
+			var allIsDone = true;
+			for(var a = 0; a < isDone.length; a++) {
+				if(isDone[a] == false) { allIsDone = false; break; }
+			}
+			if(allIsDone) { documentReadyPart2(); };
+		}
+		request.send();
+	}
+	
+	return buffers;
+}
+
+// get keyboard responses
 var keys = {};
 window.onkeyup = function(e) { keys[e.keyCode] = false; }
 window.onkeydown = function(e) {
-    console.log(e.keyCode);
+    //console.log(e.keyCode);
     keys[e.keyCode] = true;
     if(e.keyCode == 32) {
         stateSwitch(e);
@@ -20,115 +142,134 @@ window.onkeydown = function(e) {
     }
     // enter
     if(e.keyCode == 13) {
-        if(jQuery("#likert")[0].className == "visible") {
-            newTestFile();
+        if(jQuery("#likert")[0].classList.contains("visible")) {
+            nextTest();
         }
     }
 }
 
-numResults = 0;
-activeButtonNum = -1;
-frequency = 0;
-results = [];
-
+// switch between document states of the test (hoe werkt dit bij andere websites?)
 function stateSwitch(e) {
 	var divs = document.getElementsByTagName('div');
-	console.log(divs);
 	
-	if(document.getElementById("startscreen").className == "visible") {
-		document.getElementById("startscreen").className = "invisible";
-		document.getElementById("likert").className = "visible";
-        newTestFile();
-        sound.genNewAudio();
-		return;
+	console.log(document.getElementById("startscreen").classList.contains("visible"));
+	if(document.getElementById("startscreen").classList.contains("visible") && document.getElementById("startscreen").innerHTML == "Press space to continue") {
+		$("#startscreen").addClass('invisible').removeClass("visible");
+		$("#likert").addClass('visible').removeClass("invisible");
+		nextTest(true);
 	}
-	if(document.getElementById("likert").className == "visible" && (keys[32] || e=="show results") && results.length != 0 ) {
-		document.getElementById("likert").className = "invisible";
+	if((keys[32] || e=="show results") && results.length != 0 ) {
+		$("#likert").addClass('invisible').removeClass("visible");
         drawTable();
-        sound.togglePlayback(1);
-		document.getElementById("results").className = "visible";
+        instrument.togglePlayback(buffers, 1);
+		ambience.togglePlayback(buffers, 1);
+		$("#results").addClass('visible').removeClass("invisible");
 		return;
 	}
 }
 
-function likertButtonClicked(e, buttonnum) {    
-	toggleButton(e, buttonnum);
-}
-
-function toggleButton(b, buttonnum) {
-	if ( b.className.match("buttonOn")) {
-		resetAllButtons();
-		b.className = "buttonOff";
+function likertButtonClicked(e, buttonnum) {
+	if ( e.classList.contains("buttonOn")) {
+		resetAllToggleableButtons();
+		e.classList.add("buttonOff");
+		e.classList.remove("buttonOn");
 	} else {
         activeButtonNum = buttonnum;
-		resetAllButtons();
-		b.className = "buttonOn";
+		resetAllToggleableButtons();
+		e.classList.add("buttonOn");
+		e.classList.remove("buttonOff");
 	}
 }
 
-function newTestFile(override = false) {
+function resetAllToggleableButtons() {
+	var buttons = document.getElementsByTagName('button');
+	for(var i = 0; i < buttons.length; i++) {
+        if(buttons[i].classList.contains("buttonOn")) {
+			buttons[i].classList.add("buttonOff");
+			buttons[i].classList.remove("buttonOn");
+        }
+	}
+}
+
+// generate next test data
+function nextTest(override = false) {
+	// override toggle can make sure a new sound file is generated even if no rating is selected yet.
 	var buttons = document.getElementsByTagName('button');
 	var isAButtonToggled = false;
     var activeButton = -1;
 	for(var i = 0; i < buttons.length; i++) {
 		if(buttons[i].id.includes("likert")) {
-			if(buttons[i].className == "buttonOn") {
+			if(buttons[i].classList.contains("buttonOn")) {
 				isAButtonToggled = true;
 			}
 		}
 	}
-	if(isAButtonToggled || override) {
-        results.push([activeButtonNum, frequency]);
+	if(isAButtonToggled) {
+        results.push([activeButtonNum, instrument.frequency, instrument.selectedAudio]);
         numResults++;
-		resetAllButtons();
-        sound.genNewAudio();
+		resetAllToggleableButtons();
+	}
+	if(isAButtonToggled || override) {
+		// random audio and soundfile
+		instrument.frequency = 10+20*Math.random(30, 60);
+		chosenAudio = Math.floor(Math.random() * instrumentPaths.length);
+		instrument.selectedAudio = chosenAudio;
+		ambience.selectedAudio = chosenAudio;
+		instrument.play(buffers);
+		ambience.play(buffers);
+		console.log(""+instrument.frequency+ " - " +chosenAudio);
 	}
 }
 
-function resetAllButtons() {
-	var buttons = document.getElementsByTagName('button');
-	for(var i = 0; i < buttons.length; i++) {
-        b = buttons[i].className;
-        if(b == "buttonOn") {
-            buttons[i].className = "buttonOff";
-        }
-	}
-}
-
-function Sound() {
-    sounds = [["Aestethics_3.mp3", "audio/mpeg"]]
-    
-    this.genNewAudio = function() {
-        frequency = 30+30*Math.random(30, 60);
-        
-        var e = jQuery("#likert_audio")[0];
-        var rand = sounds[Math.floor(Math.random() * sounds.length)];
-        e.src = rand[0];
-        e.type = rand[1];
-        e.load();
-        
-        this.playSound();
-    }
-    
-    this.playSound = function() {
-        this.togglePlayback(0);
-    }
-
-    this.togglePlayback = function(mode=2) {
-        // mode 0 = restart, mode 1 = stop, mode 2 = toggle
-        var e = jQuery("#likert_audio")[0];
-        if(mode == 0) { e.currentTime=0; }
-        if((e.paused && mode==2) || mode==0) {
-            e.play();
+function Sound(whichPartOfBuffer) { 
+	this.part = whichPartOfBuffer;
+	this.source = null;   
+	this.isplaying = false;
+	this.frequency = null;
+	this.selectedAudio = 0;
+	
+    this.togglePlayback = function(buffers, mode=3, shouldLoop=false) {
+        // mode 1 = stop, mode 2 = start, mode 3 = toggle
+        var e = jQuery("#likert_audio_control")[0];
+		
+        //if(mode == 0) { e.currentTime=0; }
+        if(mode==2) {
+            this.play(buffers, shouldLoop);
             jQuery("#play_sound_button")[0].innerHTML = "Stop sound";
-        } else if ((!e.paused && mode==2) || mode==1) {
-            e.currentTime = 0;
-            e.pause();
+        } else if (mode==1) {
+            this.stop(shouldLoop);
             jQuery("#play_sound_button")[0].innerHTML = "Start sound";
-        }
+        } else if (mode==3) {
+			if(this.isplaying) {
+				this.stop(shouldLoop);
+				jQuery("#play_sound_button")[0].innerHTML = "Start sound";
+			} else {
+				this.play(buffers, shouldLoop);
+				jQuery("#play_sound_button")[0].innerHTML = "Stop sound";
+			}
+		}
     }
+	
+	this.play = function(buffers, shouldLoop=true) {
+		if(this.source) {this.source.stop();}
+		this.source = audioCtx.createBufferSource();
+		console.log(this.selectedAudio + this.part*buffers.length*0.5);
+		this.source.buffer = buffers[this.selectedAudio + this.part*buffers.length*0.5];
+		console.log(buffers);
+		this.source.loop = shouldLoop; 
+		if(this.frequency != null) {
+			this.source.loopEnd = 1 / this.frequency;
+		}
+		this.source.connect(gainNode).connect(audioCtx.destination);
+		this.source.start();
+		this.isplaying = true;
+	}
+	
+	this.stop = function() {
+		this.source.stop();
+		this.isplaying = false;
+	}
 }
-var sound = new Sound();
 
 function drawTable() {
     
@@ -139,7 +280,8 @@ function drawTable() {
     for (var i = 0; i < results.length; i++) {
         // data += "("+i+") ";
         data += ("["+results[i][1]).substring(0,4)+", ";
-        data += "\""+likertList[results[i][0]] + "\"], ";
+        data += "\""+likertList[results[i][0]] + "\", ";
+		data += ""+results[i][2]+"], ";
     }
     data += "]"
     
@@ -164,9 +306,8 @@ function drawTable() {
             dataForGraph.push(0);
         }
     }
-    drawGraph(dataForGraph);
-    
-    /////////////////////////////////////////////////
+	
+	/////////////////////////////////////////////////
     
     var body = document.getElementById("results_table");
     var tbl = document.createElement("table");
@@ -184,41 +325,28 @@ function drawTable() {
         var cellText = document.createTextNode(likertList[i]);
         cell.appendChild(cellText);
         row.appendChild(cell);
-        
+		
         tblBody.appendChild(row);
     }
 
     tbl.appendChild(tblBody);
     body.appendChild(tbl);
     tbl.setAttribute("border", "2");
+	
+	
+    drawGraph(dataForGraph);
 }
 
 function drawGraph(dat) {
     //var Chart = require('chart.js'); 
-    var ctx = document.getElementById("myChart").getContext('2d');
-    var myChart = new Chart(ctx, {
+	Chart.defaults.global.elements.line.fill = false;
+    var c = new Chart(document.getElementById("myChart"), {
         type: 'line',
         data: {
-            labels: likertList,
+            labels: [0,1,2,3,4],
             datasets: [{
-                label: '# of Votes',
+                label: 'Distinguishability',
                 data: dat,
-                backgroundColor: [
-                    'rgba(255, 99, 132, 0.2)',
-                    'rgba(54, 162, 235, 0.2)',
-                    'rgba(255, 206, 86, 0.2)',
-                    'rgba(75, 192, 192, 0.2)',
-                    'rgba(153, 102, 255, 0.2)',
-                    'rgba(255, 159, 64, 0.2)'
-                ],
-                borderColor: [
-                    'rgba(255,99,132,1)',
-                    'rgba(54, 162, 235, 1)',
-                    'rgba(255, 206, 86, 1)',
-                    'rgba(75, 192, 192, 1)',
-                    'rgba(153, 102, 255, 1)',
-                    'rgba(255, 159, 64, 1)'
-                ],
                 borderWidth: 1
             }]
         },
@@ -229,7 +357,12 @@ function drawGraph(dat) {
                         beginAtZero:true
                     }
                 }]
-            }
+            },
+			title: {
+				display: true,
+				text: 'Distinguishability of individual notes with different playback frequencies'
+			}
         }
     });
+	console.log(c);
 }
