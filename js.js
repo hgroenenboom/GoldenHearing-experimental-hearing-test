@@ -8,13 +8,27 @@ const audioCtx = new AudioContext();
 const gainNode = audioCtx.createGain();
 
 var instrumentPaths = [
-	// ["audio/Aestethics_3.mp3", "audio/mpeg"], 
+	// ["audio/Aestethics_3.mp3", "audio/mpeg"],
+	
 	["https://hgroenenboom.github.io/HKU-Hearing-test/audio/Impulse.mp3"],
 	["https://hgroenenboom.github.io/HKU-Hearing-test/audio/Impulse_h.mp3"],
+	['https://hgroenenboom.github.io/HKU-Hearing-test/audio/Hearingtest Samples/Piano_Original_1.mp3'], 
+	['https://hgroenenboom.github.io/HKU-Hearing-test/audio/Hearingtest Samples/Piano_TD10_Original_1.mp3'], 
+	['https://hgroenenboom.github.io/HKU-Hearing-test/audio/Hearingtest Samples/Piano_TD5_Original_1.mp3'], 
+	['https://hgroenenboom.github.io/HKU-Hearing-test/audio/Hearingtest Samples/Snare_Original_1.mp3'], 
+	['https://hgroenenboom.github.io/HKU-Hearing-test/audio/Hearingtest Samples/Snare_td10_Original_1.mp3'], 
+	['https://hgroenenboom.github.io/HKU-Hearing-test/audio/Hearingtest Samples/Snare_td5_Original_1.mp3'], 
+	['https://hgroenenboom.github.io/HKU-Hearing-test/audio/Hearingtest Samples/woodblock_Original_1.mp3'], 
+	['https://hgroenenboom.github.io/HKU-Hearing-test/audio/Hearingtest Samples/woodblock_td10_Original_1.mp3'], 
+	['https://hgroenenboom.github.io/HKU-Hearing-test/audio/Hearingtest Samples/woodblock_td5_Original_1.mp3']
 ];
 var ambiencePaths = [
 	["https://hgroenenboom.github.io/HKU-Hearing-test/audio/Aestethics_3.mp3", "audio/wav", "audio/mpeg"], 
-	["https://hgroenenboom.github.io/HKU-Hearing-test/audio/Aestethics_3_h.mp3", "audio/wav"],
+	["https://hgroenenboom.github.io/HKU-Hearing-test/audio/Aestethics_3_h.mp3", "audio/mp3"],
+	['https://hgroenenboom.github.io/HKU-Hearing-test/audio/Hearingtest Samples/Background/162765__dorhel__symphony-orchestra-tuning-before-concert.mp3'], 
+	['https://hgroenenboom.github.io/HKU-Hearing-test/audio/Hearingtest Samples/Background/191350__malupeeters__traffic-mel-1.mp3'], 
+	['https://hgroenenboom.github.io/HKU-Hearing-test/audio/Hearingtest Samples/Background/214993__4team__ambient-sound-inside-cafe-dining.mp3'], 
+	['https://hgroenenboom.github.io/HKU-Hearing-test/audio/Hearingtest Samples/Background/387548__mikikroom__city-milano-traffic-whistle-moto.mp3']
 ];
 var buffers = [];
 // var instrumentBuffers = [];
@@ -79,8 +93,7 @@ function getSoundBuffers(soundPaths) {
 	for(var i = 0; i < soundPaths.length; i++) {
 		isDone.push(false);
 		loadingProcessIdentifiers[i] = soundPaths[i][0];
-		console.log("loadingProcessIdentifiers: ");
-		console.log(loadingProcessIdentifiers);
+		
 		
 		request = new XMLHttpRequest();
 		request.open('GET', soundPaths[i][0], true);
@@ -88,8 +101,6 @@ function getSoundBuffers(soundPaths) {
 		
 		var showProcess = function (e) {	
 			console.log("inside showprocess with e.loaded: "+e.loaded / e.total * 100 / (instrumentPaths.length*2));
-			console.log("e: ");
-			console.log(e);
 			console.log("original url = "+e.srcElement.responseURL);
 			var n = loadingProcessIdentifiers.indexOf(e.srcElement.responseURL);
 			console.log("n = "+n);
@@ -133,6 +144,8 @@ function getSoundBuffers(soundPaths) {
 		request.send();
 	}
 	
+	console.log("loadingProcessIdentifiers: ");
+	console.log(loadingProcessIdentifiers);
 	return buffers;
 }
 
