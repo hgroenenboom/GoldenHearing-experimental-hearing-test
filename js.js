@@ -32,6 +32,7 @@ var ambience = new Sound(1);
 
 $(document).ready(function(){
 	jQuery("#startscreen")[0].innerHTML = "please wait till all audio has been loaded";
+	console.log("deb versie 1");
 	
 	var allPaths = instrumentPaths.concat(ambiencePaths);
 	buffers = getSoundBuffers(allPaths);
@@ -109,7 +110,7 @@ function getSoundBuffers(soundPaths) {
 			var audioData = this.response;
 			audioCtx.decodeAudioData(audioData, function(buffer) {
 				buffers[n] = buffer;
-			}, function(e){"Error with decoding audio data" + e.error});
+			}, function(e){console.log("Error with decoding audio data" + e.error);});
 			
 			// check if all buffers are loaded
 			isDone[n] = true;
