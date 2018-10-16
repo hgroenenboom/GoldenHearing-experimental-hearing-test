@@ -89,6 +89,8 @@ function getSoundBuffers(soundPaths) {
 		var showProcess = function (e) {	
 			console.log("inside showprocess with e.loaded: "+e.loaded / e.total * 100 / (instrumentPaths.length*2));
 			var n = loadingProcessIdentifiers.indexOf(e.originalTarget.responseURL);
+			console.log("e.originalTarget: ");
+			console.log(e.originalTarget);
 			console.log("original url = "+e.originalTarget.responseURL);
 			console.log("n = "+n);
 			
@@ -189,7 +191,7 @@ function likertButtonClicked(e, buttonnum) {
 		resetAllToggleableButtons();
 		e.classList.add("buttonOn");
 		e.classList.remove("buttonOff");
-		document.getElementById("next_file_button").disabled = '';
+		//document.getElementById("next_file_button").disabled = '';
 		nextTest();
 	}
 }
@@ -202,7 +204,7 @@ function resetAllToggleableButtons() {
 			buttons[i].classList.remove("buttonOn");
         }
 	}
-	document.getElementById("next_file_button").disabled = "disabled";
+	//document.getElementById("next_file_button").disabled = "disabled";
 }
 
 // generate next test data
