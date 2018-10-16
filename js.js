@@ -9,12 +9,12 @@ const gainNode = audioCtx.createGain();
 
 var instrumentPaths = [
 	// ["audio/Aestethics_3.mp3", "audio/mpeg"], 
-	["https://studentdav.hku.nl/public_html/hearingtest/audio/Impulse.mp3"],
-	["audio/Impulse_h.mp3"],
+	["https://hgroenenboom.github.io/HKU-Hearing-test/audio/Impulse.mp3"],
+	["https://hgroenenboom.github.io/HKU-Hearing-test/audio/Impulse_h.mp3"],
 ];
 var ambiencePaths = [
-	["audio/Aestethics_3.mp3", "audio/wav", "audio/mpeg"], 
-	["audio/Aestethics_3_h.mp3", "audio/wav"],
+	["https://hgroenenboom.github.io/HKU-Hearing-test/audio/Aestethics_3.mp3", "audio/wav", "audio/mpeg"], 
+	["https://hgroenenboom.github.io/HKU-Hearing-test/audio/Aestethics_3_h.mp3", "audio/wav"],
 ];
 var buffers = [];
 // var instrumentBuffers = [];
@@ -190,6 +190,7 @@ function likertButtonClicked(e, buttonnum) {
 		e.classList.add("buttonOn");
 		e.classList.remove("buttonOff");
 		document.getElementById("next_file_button").disabled = '';
+		nextTest();
 	}
 }
 
