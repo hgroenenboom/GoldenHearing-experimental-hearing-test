@@ -7,11 +7,11 @@ const gainNode = audioCtx.createGain();
 
 var instrumentPaths = [
 	["audio/Aestethics_3.mp3", "audio/mpeg"], 
-	["https://studentdav.hku.nl/public_html/hearingtest/audio/Impulse_h.mp3"],
+	["audio/Impulse_h.mp3"],
 ];
 var ambiencePaths = [
-	["https://studentdav.hku.nl/public_html/hearingtest/audio/Aestethics_3.mp3", "audio/wav", "audio/mpeg"], 
-	["https://studentdav.hku.nl/public_html/hearingtest/audio/Aestethics_3_h.mp3", "audio/wav"],
+	["audio/Aestethics_3.mp3", "audio/wav", "audio/mpeg"], 
+	["audio/Aestethics_3_h.mp3", "audio/wav"],
 ];
 var buffers = [];
 // var instrumentBuffers = [];
