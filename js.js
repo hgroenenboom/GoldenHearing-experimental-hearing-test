@@ -88,10 +88,10 @@ function getSoundBuffers(soundPaths) {
 		
 		var showProcess = function (e) {	
 			console.log("inside showprocess with e.loaded: "+e.loaded / e.total * 100 / (instrumentPaths.length*2));
-			var n = loadingProcessIdentifiers.indexOf(e.originalTarget.responseURL);
-			console.log("e.originalTarget: ");
-			console.log(e.originalTarget);
-			console.log("original url = "+e.originalTarget.responseURL);
+			console.log("e: ");
+			console.log(e);
+			console.log("original url = "+e.srcElement.responseURL);
+			var n = loadingProcessIdentifiers.indexOf(e.srcElement.responseURL);
 			console.log("n = "+n);
 			
 			var text = "audioLoadingProcess";
