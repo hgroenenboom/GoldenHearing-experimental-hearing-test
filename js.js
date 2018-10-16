@@ -1,4 +1,4 @@
-	console.log("deb versie 4");
+	console.log("v 1.0");
 
 // get context
 const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -9,23 +9,23 @@ const gainNode = audioCtx.createGain();
 
 var instrumentPaths = [
 	// ["audio/Aestethics_3.mp3", "audio/mpeg"],
-	['https://hgroenenboom.github.io/HKU-Hearing-test/audio/samples/Piano_Original_1.mp3'], 
-	// ['https://hgroenenboom.github.io/HKU-Hearing-test/audio/samples/Piano_TD10_Original_1.mp3'], 
-	// ['https://hgroenenboom.github.io/HKU-Hearing-test/audio/samples/Piano_TD5_Original_1.mp3'], 
-	['https://hgroenenboom.github.io/HKU-Hearing-test/audio/samples/Snare_Original_1.mp3'], 
-	// ['https://hgroenenboom.github.io/HKU-Hearing-test/audio/samples/Snare_td10_Original_1.mp3'], 
-	// ['https://hgroenenboom.github.io/HKU-Hearing-test/audio/samples/Snare_td5_Original_1.mp3'], 
-	['https://hgroenenboom.github.io/HKU-Hearing-test/audio/samples/woodblock_Original_1.mp3'], 
-	// ['https://hgroenenboom.github.io/HKU-Hearing-test/audio/samples/woodblock_td10_Original_1.mp3'], 
-	// ['https://hgroenenboom.github.io/HKU-Hearing-test/audio/samples/woodblock_td5_Original_1.mp3']
+	['https://hgroenenboom.github.io/HKU-Hearing-test/audio/samples/Piano_Original_1.wav'], 
+	// ['https://hgroenenboom.github.io/HKU-Hearing-test/audio/samples/Piano_TD10_Original_1.wav'], 
+	// ['https://hgroenenboom.github.io/HKU-Hearing-test/audio/samples/Piano_TD5_Original_1.wav'], 
+	['https://hgroenenboom.github.io/HKU-Hearing-test/audio/samples/Snare_Original_1.wav'], 
+	// ['https://hgroenenboom.github.io/HKU-Hearing-test/audio/samples/Snare_td10_Original_1.wav'], 
+	// ['https://hgroenenboom.github.io/HKU-Hearing-test/audio/samples/Snare_td5_Original_1.wav'], 
+	['https://hgroenenboom.github.io/HKU-Hearing-test/audio/samples/woodblock_Original_1.wav'], 
+	// ['https://hgroenenboom.github.io/HKU-Hearing-test/audio/samples/woodblock_td10_Original_1.wav'], 
+	// ['https://hgroenenboom.github.io/HKU-Hearing-test/audio/samples/woodblock_td5_Original_1.wav']
 ];
 var ambiencePaths = [
 	//["https://hgroenenboom.github.io/hku-hearing-test/audio/aestethics_3.mp3", "audio/wav", "audio/mpeg"], 
 	//["https://hgroenenboom.github.io/hku-hearing-test/audio/aestethics_3_h.mp3", "audio/mp3"],
-	['https://hgroenenboom.github.io/HKU-Hearing-test/audio/samples/Backgrounds/162765__dorhel__symphony-orchestra-tuning-before-concert.mp3'], 
-	['https://hgroenenboom.github.io/HKU-Hearing-test/audio/samples/Backgrounds/214993__4team__ambient-sound-inside-cafe-dining.mp3'], 
-	['https://hgroenenboom.github.io/HKU-Hearing-test/audio/samples/Backgrounds/191350__malupeeters__traffic-mel-1.mp3'], 
-	// ['https://hgroenenboom.github.io/HKU-Hearing-test/audio/samples/Backgrounds/387548__mikikroom__city-milano-traffic-whistle-moto.mp3']
+	['https://hgroenenboom.github.io/HKU-Hearing-test/audio/samples/Backgrounds/162765__dorhel__symphony-orchestra-tuning-before-concert.wav'], 
+	['https://hgroenenboom.github.io/HKU-Hearing-test/audio/samples/Backgrounds/214993__4team__ambient-sound-inside-cafe-dining.wav'], 
+	['https://hgroenenboom.github.io/HKU-Hearing-test/audio/samples/Backgrounds/191350__malupeeters__traffic-mel-1.wav'], 
+	// ['https://hgroenenboom.github.io/HKU-Hearing-test/audio/samples/Backgrounds/387548__mikikroom__city-milano-traffic-whistle-moto.wav']
 ];
 var buffers = [];
 // var instrumentBuffers = [];
