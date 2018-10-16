@@ -80,7 +80,8 @@ function getSoundBuffers(soundPaths) {
 		request.open('GET', soundPaths[i][0], true);
 		request.responseType = 'arraybuffer';
 		
-		var showProcess = function (e) {			
+		var showProcess = function (e) {	
+			console.log("inside showprocess with e.loaded: "+e.loaded / e.total * 100 / (instrumentPaths.length*2));
 			var n = loadingProcessIdentifiers.indexOf(e.originalTarget.responseURL);
 			
 			var text = "audioLoadingProcess";
@@ -89,6 +90,7 @@ function getSoundBuffers(soundPaths) {
 			} 
 			
 			loadingProcess[n] = e.loaded / e.total * 100 / (instrumentPaths.length*2);
+			console.log("inside showprocess with loadingprocess: " + loadingProcess);
 			
 			var total = 0
 			for(var j = 0; j < loadingProcess.length; j++) {
