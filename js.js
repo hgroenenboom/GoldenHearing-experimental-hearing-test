@@ -1,3 +1,5 @@
+	console.log("deb versie 2");
+
 // get context
 const AudioContext = window.AudioContext || window.webkitAudioContext;
 const audioCtx = new AudioContext();
@@ -32,7 +34,6 @@ var ambience = new Sound(1);
 
 $(document).ready(function(){
 	jQuery("#startscreen")[0].innerHTML = "please wait till all audio has been loaded";
-	console.log("deb versie 1");
 	
 	var allPaths = instrumentPaths.concat(ambiencePaths);
 	buffers = getSoundBuffers(allPaths);
@@ -76,6 +77,8 @@ function getSoundBuffers(soundPaths) {
 	for(var i = 0; i < soundPaths.length; i++) {
 		isDone.push(false);
 		loadingProcessIdentifiers[i] = soundPaths[i][0];
+		process.stdout.write(("loadingProcessIdentifiers: ");
+		console.log(loadingProcessIdentifiers);
 		
 		request = new XMLHttpRequest();
 		request.open('GET', soundPaths[i][0], true);
