@@ -1,4 +1,4 @@
-	console.log("deb versie 3");
+	console.log("deb versie 4");
 
 // get context
 const AudioContext = window.AudioContext || window.webkitAudioContext;
