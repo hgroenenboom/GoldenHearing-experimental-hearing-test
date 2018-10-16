@@ -1,6 +1,6 @@
 html, body {
 	height:100%;
-	font-size: 15px;
+	font-size: 30px;
 }
 
 .buttonOff {
@@ -16,6 +16,7 @@ div {
 	height: 100%;
 	position: absolute;
 	width: 100%;
+	font-size: 30px;
 	/* position: absolute; */
 }
 
@@ -37,7 +38,7 @@ div {
 	left: 5%;
 	width: 90%;
 	top: 5%;
-	height: 90%;
+	height: 40%;
 	position: fixed;
 	border: 1px solid #000000 ;
 	
@@ -105,7 +106,7 @@ button {
     /* width: 18%; */
 	/* height: 100px; */
 	/* text-align: center; */
-	font-size: 18px;
+	font-size: 23px;
 }
 
 .centered {

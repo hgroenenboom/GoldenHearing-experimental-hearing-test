@@ -6,7 +6,7 @@ const audioCtx = new AudioContext();
 const gainNode = audioCtx.createGain();
 
 var instrumentPaths = [
-	["https://studentdav.hku.nl/public_html/hearingtest/audio/Impulse.mp3", "audio/mpeg"], 
+	["audio/Aestethics_3.mp3", "audio/mpeg"], 
 	["https://studentdav.hku.nl/public_html/hearingtest/audio/Impulse_h.mp3"],
 ];
 var ambiencePaths = [
@@ -85,7 +85,7 @@ function getSoundBuffers(soundPaths) {
 			
 			var text = "audioLoadingProcess";
 			if( document.getElementById(text) == null ) {
-				$( "<div id='"+text+"'></div>" ).appendTo( jQuery("#startscreen") );
+				$( "<div id='"+text+"' class='centered bottomhalf'></div> " ).appendTo( jQuery("#startscreen") );
 			} 
 			
 			loadingProcess[n] = e.loaded / e.total * 100 / (instrumentPaths.length*2);
@@ -97,7 +97,7 @@ function getSoundBuffers(soundPaths) {
 			document.getElementById(text).innerHTML = "loading: "+total+"%";
 		}
 		
-		request.addEventListener("load", function (e){console.log("\trequest-load");});
+		request.addEventListener("load", function (e){ console.log("\trequest-load");showProcess(e); });
 		request.addEventListener("error", function (e) {console.log("\trequest-error");});
 		request.addEventListener("abort", function (e) {console.log("\trequest-abort");});
 		request.addEventListener("progress", showProcess);
@@ -113,7 +113,7 @@ function getSoundBuffers(soundPaths) {
 			isDone[n] = true;
 			var allIsDone = true;
 			for(var a = 0; a < isDone.length; a++) {
-				if(isDone[a] == false) { allIsDone = false; break; }
+				if(isDone[a] != true) { allIsDone = false; break; }
 			}
 			if(allIsDone) { documentReadyPart2(); };
 		}
@@ -178,6 +178,7 @@ function likertButtonClicked(e, buttonnum) {
 		resetAllToggleableButtons();
 		e.classList.add("buttonOn");
 		e.classList.remove("buttonOff");
+		document.getElementById("next_file_button").disabled = '';
 	}
 }
 
@@ -189,6 +190,7 @@ function resetAllToggleableButtons() {
 			buttons[i].classList.remove("buttonOn");
         }
 	}
+	document.getElementById("next_file_button").disabled = "disabled";
 }
 
 // generate next test data
@@ -218,6 +220,10 @@ function nextTest(override = false) {
 		instrument.play(buffers);
 		ambience.play(buffers);
 		console.log(""+instrument.frequency+ " - " +chosenAudio);
+	}
+	
+	if(results.length >= 10) {
+		stateSwitch("show results");
 	}
 }
 

@@ -5,7 +5,6 @@
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script src="Chart.bundle.js"></script>
 	<script src="Chart.bundle.min.js"></script>
-	<script src="SoundPlayer.js"></script>
 	<script type="text/javascript" src="js.js"></script>
 	<title>Hearing test</title>
 </head>
@@ -25,7 +24,7 @@
 			</div>
 			
 			<div class="bottomhalf">
-				<button id="next_file_button" type="button" onclick="nextTest()">Next sound</button>
+				<button id="next_file_button" type="button" onclick="nextTest();" disabled="disabled"">Next sound</button>
 				<button id="play_sound_button" type="button" onclick="instrument.togglePlayback(buffers, 3, true);ambience.togglePlayback(buffers, 3, true)">Stop sound</button>
 				
 				<audio id="likert_audio_control" class="invisible">
@@ -34,7 +33,7 @@
 				
 				<input type="range" id="volume" class="control-volume" min="0" max="2" value="1" list="gain-vals" step="0.01" data-action="volume" />
 				
-				<button id="show_results" type="button" onclick="stateSwitch('show results')">Show results</button>
+				<!-- <button id="show_results" type="button" onclick="stateSwitch('show results')">Show results</button> -->
 			</div>
 		</div>
 	</div>
