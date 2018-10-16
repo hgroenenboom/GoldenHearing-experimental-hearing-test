@@ -1,4 +1,4 @@
-	console.log("deb versie 2");
+	console.log("deb versie 3");
 
 // get context
 const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -8,7 +8,8 @@ const audioCtx = new AudioContext();
 const gainNode = audioCtx.createGain();
 
 var instrumentPaths = [
-	["audio/Aestethics_3.mp3", "audio/mpeg"], 
+	// ["audio/Aestethics_3.mp3", "audio/mpeg"], 
+	["https://studentdav.hku.nl/public_html/hearingtest/audio/Impulse.mp3"],
 	["audio/Impulse_h.mp3"],
 ];
 var ambiencePaths = [
@@ -22,6 +23,7 @@ var buffers = [];
 var loadingProcessIdentifiers = [0];
 var loadingProcess = [0];
 loadingProcess.length = instrumentPaths.length*2;
+for(var i = 0; i < loadingProcess.length; i++) { loadingProcess[i] = 0; }
 loadingProcessIdentifiers.length = instrumentPaths.length*2;
 
 // saving all results
@@ -77,7 +79,7 @@ function getSoundBuffers(soundPaths) {
 	for(var i = 0; i < soundPaths.length; i++) {
 		isDone.push(false);
 		loadingProcessIdentifiers[i] = soundPaths[i][0];
-		process.stdout.write(("loadingProcessIdentifiers: ");
+		console.log("loadingProcessIdentifiers: ");
 		console.log(loadingProcessIdentifiers);
 		
 		request = new XMLHttpRequest();
@@ -87,13 +89,16 @@ function getSoundBuffers(soundPaths) {
 		var showProcess = function (e) {	
 			console.log("inside showprocess with e.loaded: "+e.loaded / e.total * 100 / (instrumentPaths.length*2));
 			var n = loadingProcessIdentifiers.indexOf(e.originalTarget.responseURL);
+			console.log("original url = "+e.originalTarget.responseURL);
+			console.log("n = "+n);
 			
 			var text = "audioLoadingProcess";
 			if( document.getElementById(text) == null ) {
 				$( "<div id='"+text+"' class='centered bottomhalf'></div> " ).appendTo( jQuery("#startscreen") );
 			} 
 			
-			loadingProcess[n] = e.loaded / e.total * 100 / (instrumentPaths.length*2);
+			var val = e.loaded / e.total * 100 / (instrumentPaths.length*2);
+			if(val != NaN) {loadingProcess[n] = val;} else {loadingProcess[n] = 0;}
 			console.log("inside showprocess with loadingprocess: " + loadingProcess);
 			
 			var total = 0
