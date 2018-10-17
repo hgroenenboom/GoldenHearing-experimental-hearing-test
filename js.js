@@ -1,4 +1,10 @@
-	console.log("v 1.0");
+// Requires:
+// - WebAudio
+// - Chart.js
+// - d3
+
+// Version
+console.log("v 1.1");
 
 // get context
 const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -7,6 +13,7 @@ const audioCtx = new AudioContext();
 // dsp modules
 const gainNode = audioCtx.createGain();
 
+// audio sources
 var instrumentPaths = [
 	// ["audio/Aestethics_3.mp3", "audio/mpeg"],
 	['https://hgroenenboom.github.io/HKU-Hearing-test/audio/samples/Piano_Original_1.wav'], 
@@ -28,16 +35,19 @@ var ambiencePaths = [
 	// ['https://hgroenenboom.github.io/HKU-Hearing-test/audio/samples/Backgrounds/387548__mikikroom__city-milano-traffic-whistle-moto.wav']
 ];
 var buffers = [];
-// var instrumentBuffers = [];
-// var ambienceBuffers = [];
 
+// for debugging: only generates one audio settings
+// instrumentPaths = [instrumentPaths[1]];
+// ambiencePaths = [ambiencePaths[1]];
+
+// array's containing information while requesting the audio
 var loadingProcessIdentifiers = [0];
 var loadingProcess = [0];
 loadingProcess.length = instrumentPaths.length*2;
 for(var i = 0; i < loadingProcess.length; i++) { loadingProcess[i] = 0; }
 loadingProcessIdentifiers.length = instrumentPaths.length*2;
 
-// saving all results
+// variables used for saving all results
 var numResults = 0;
 var activeButtonNum = null; // currently active likert button
 var results = []; 
@@ -45,19 +55,94 @@ var chosenAudio = 0;
 var instrument = new Sound(0);
 var ambience = new Sound(1);
 
+// actual values used inside the test
+// the amount of values is a multiplication of the number of samples and the amount of random number generated
+var maxFrequency = 30;
+var startFrequency = 15;
+var randomGrabber = [];
+for(var i = 0; i < 10; i++) {
+	var freq = startFrequency+(maxFrequency-startFrequency)/9*i;
+	for(var j = 0; j < instrumentPaths.length; j++) {
+		randomGrabber.push([freq, j]); 
+	}
+}
+randomGrabber = d3.shuffle(randomGrabber);
+
+
+/*--------------------------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------------------------*/
+
+// handle all keyboard input (a bit chaotic still)
+var keys = {};
+window.onkeyup = function(e) { keys[e.keyCode] = false; }
+window.onkeydown = function(e) {
+    //console.log(e.keyCode);
+    keys[e.keyCode] = true;
+    if(e.keyCode == 32) {
+        stateSwitch(e);
+    }
+    if((e.keyCode >= 48 && e.keyCode <= 57) || (e.keyCode >= 96 && e.keyCode <= 105)) {
+        var key =  e.keyCode % 48;
+        
+        if(key > 0 && key <= 5) {
+            var likertButtons = jQuery("#likertbuttons button");
+            likertButtons[key-1].click();
+        }
+    }
+    // enter
+    if(e.keyCode == 13) {
+        if(jQuery("#likert")[0].classList.contains("visible")) {
+            nextTest();
+        }
+    }
+}
+
+// switch between document states of the test (hoe werkt dit bij andere websites?)
+function stateSwitch(e) {
+	var divs = document.getElementsByTagName('div');
+	
+	console.log(document.getElementById("startscreen").classList.contains("visible"));
+	if(document.getElementById("startscreen").classList.contains("visible") && document.getElementById("startscreen").innerHTML == "Press space to continue") {
+		$("#startscreen").addClass('invisible').removeClass("visible");
+		$("#likert").addClass('visible').removeClass("invisible");
+		nextTest(true);
+	}
+	if((keys[32] || e=="show results") && results.length != 0 ) {
+		$("#likert").addClass('invisible').removeClass("visible");
+        drawTable();
+        instrument.togglePlayback(buffers, 1);
+		ambience.togglePlayback(buffers, 1);
+		$("#results").addClass('visible').removeClass("invisible");
+		return;
+	}
+}
+
+likertList = ["Not at all", "Slightly", "Moderately", "Very", "Extremely"];
 $(document).ready(function(){
 	jQuery("#startscreen")[0].innerHTML = "please wait till all audio has been loaded";
 	
+	var buttons = document.getElementsByTagName('button');
+	for(var i = 0; i < buttons.length; i++) {
+        if(buttons[i].classList.contains("buttonOn") || buttons[i].classList.contains("buttonOff")) {
+			var id = ""+buttons[i].id
+			if(id.substring(0, 7) == "likert") {
+				buttons[i].innerHTML = likertList[buttons[i][8]*1];
+			}
+		}
+	}
+	
+	
+	// get all soundbuffers as soon as the document is loaded (why?)
 	var allPaths = instrumentPaths.concat(ambiencePaths);
 	buffers = getSoundBuffers(allPaths);
 });
 
+// starts after all sounds are loaded
 function documentReadyPart2() {
 	jQuery("#startscreen")[0].innerHTML = "Press space to continue";
 	
 	// initiate audio elements
     audioElement = document.querySelector("audio");
-	
 	const track = audioCtx.createMediaElementSource(audioElement);
 	const volumeControl = document.querySelector('[data-action="volume"]');
 	volumeControl.addEventListener('input', function() {
@@ -67,20 +152,9 @@ function documentReadyPart2() {
 	
 	// start audio - necessary?
 	audioCtx.resume();
-	
-	// console.log(buffers);
-	// var half_length = ambiencePaths.length;    
-	// instrumentBuffers = buffers.slice(0,half_length);
-	// ambienceBuffers = buffers.slice(half_length,half_length+half_length);
-	// console.log(buffers.slice(half_length,half_length+half_length));
-	// console.log(buffers);
-	
-	// console.log("instrumentBuffers: ");
-	// console.log(instrumentBuffers);
-	// console.log("ambienceBuffers: ");
-	// console.log(ambienceBuffers);
 }
 
+// functions returns audioBuffers (WebAudio) by getting html's to audio files.
 function getSoundBuffers(soundPaths) {
 	var buffers = [];
 	var isDone = [];
@@ -151,50 +225,6 @@ function getSoundBuffers(soundPaths) {
 	return buffers;
 }
 
-// get keyboard responses
-var keys = {};
-window.onkeyup = function(e) { keys[e.keyCode] = false; }
-window.onkeydown = function(e) {
-    //console.log(e.keyCode);
-    keys[e.keyCode] = true;
-    if(e.keyCode == 32) {
-        stateSwitch(e);
-    }
-    if((e.keyCode >= 48 && e.keyCode <= 57) || (e.keyCode >= 96 && e.keyCode <= 105)) {
-        var key =  e.keyCode % 48;
-        
-        if(key > 0 && key <= 5) {
-            var likertButtons = jQuery("#likertbuttons button");
-            likertButtons[key-1].click();
-        }
-    }
-    // enter
-    if(e.keyCode == 13) {
-        if(jQuery("#likert")[0].classList.contains("visible")) {
-            nextTest();
-        }
-    }
-}
-
-// switch between document states of the test (hoe werkt dit bij andere websites?)
-function stateSwitch(e) {
-	var divs = document.getElementsByTagName('div');
-	
-	console.log(document.getElementById("startscreen").classList.contains("visible"));
-	if(document.getElementById("startscreen").classList.contains("visible") && document.getElementById("startscreen").innerHTML == "Press space to continue") {
-		$("#startscreen").addClass('invisible').removeClass("visible");
-		$("#likert").addClass('visible').removeClass("invisible");
-		nextTest(true);
-	}
-	if((keys[32] || e=="show results") && results.length != 0 ) {
-		$("#likert").addClass('invisible').removeClass("visible");
-        drawTable();
-        instrument.togglePlayback(buffers, 1);
-		ambience.togglePlayback(buffers, 1);
-		$("#results").addClass('visible').removeClass("invisible");
-		return;
-	}
-}
 
 function likertButtonClicked(e, buttonnum) {
 	if ( e.classList.contains("buttonOn")) {
@@ -223,6 +253,7 @@ function resetAllToggleableButtons() {
 }
 
 // generate next test data
+var counter = 0; // counts through the randomGrabber
 function nextTest(override = false) {
 	// override toggle can make sure a new sound file is generated even if no rating is selected yet.
 	var buttons = document.getElementsByTagName('button');
@@ -242,16 +273,18 @@ function nextTest(override = false) {
 	}
 	if(isAButtonToggled || override) {
 		// random audio and soundfile
-		instrument.frequency = 15+15*Math.random(30, 60);
-		chosenAudio = Math.floor(Math.random() * instrumentPaths.length);
+		instrument.frequency = randomGrabber[counter][0];
+		chosenAudio = randomGrabber[counter][1];
 		instrument.selectedAudio = chosenAudio;
 		ambience.selectedAudio = chosenAudio;
+		
+		counter++; counter %= randomGrabber.length;
 		instrument.play(buffers);
 		ambience.play(buffers);
 		console.log(""+instrument.frequency+ " - " +chosenAudio);
 	}
 	
-	if(results.length >= 10) {
+	if(results.length >= randomGrabber.length) {
 		stateSwitch("show results");
 	}
 }
@@ -306,7 +339,6 @@ function Sound(whichPartOfBuffer) {
 	}
 }
 
-likertList = ["Not good", "Poor", "Neutral", "Decent", "Good"];
 function drawTable() {
     
     //document.getElementById("how to change text in html").innerHTML = "nieuwe text";
@@ -374,14 +406,16 @@ function drawTable() {
 
 function drawGraph(dat) {
 	// dat[0] = rating, dat[1] = freq, dat[2] = instrument
+	var accuracy = 4;
 	console.log(dat);
 	datPia = [];
 	datSna = [];
 	datWoo = [];
 	allData = [];
 	
+	// dat[0] = freq, dat[1] = rating
 	for(var i = 0; i < dat.length; i++) {
-		var dataP = [dat[i][0], dat[i][1]];
+		var dataP = [dat[i][1], dat[i][0]];
 		switch (dat[i][2]) {
 			case 0:
 				datPia.push(dataP);
@@ -397,21 +431,21 @@ function drawGraph(dat) {
 	}
 	
 	var getAveraged = function(data) {
+		var freqRange = maxFrequency-startFrequency;
+		var freqIncr = freqRange / accuracy;
 		newData = [];
-		for(var v = 0; v < likertList.length; v++) {
+		for(var v = 0; v < accuracy; v++) {
+			var freq = startFrequency+0.5*freqIncr*(v+1);
 			count = 0;
-			addedFrequencies = 0;
+			addedResults = 0;
 			for(var i = 0; i < data.length; i++) {
-				if(data[i][0] == v) {
-					addedFrequencies += data[i][1];
+				if(data[i][0] >= freq && data[i][0] < freq+freqIncr) {
+					addedResults += data[i][1];
 					count++;
 				}
 			}
-			if(count != 0) {
-				newData.push(addedFrequencies/count);
-			} else {
-				newData.push(0);
-			}
+			console.log(addedResults);
+			newData.push(addedResults/count);
 		}
 		return newData;
 	}
@@ -426,26 +460,34 @@ function drawGraph(dat) {
 	console.log(datSna);
 	console.log(datWoo);
 	
+	lab = [];
+	for(var i = 0; i < accuracy; i++) {
+		var freqIncr = (maxFrequency-startFrequency)/(accuracy-1);
+		lab.push(startFrequency+freqIncr*i);
+	}
+	console.log(lab);
+	
     //var Chart = require('chart.js'); 
 	Chart.defaults.global.elements.line.fill = false;
+	Chart.defaults.global.defaultFontSize = 25;
     var c = new Chart(document.getElementById("myChart"), {
         type: 'line',
         data: {
-            labels: [0,1,2,3,4],
+            labels: lab,
             datasets: [{
                 label: 'Piano',
                 data: datPia,
-				borderColor: "#3e95cd",
+				borderColor: "#c1ffca",
                 borderWidth: 1
             }, {
                 label: 'Snare',
                 data: datSna,
-				borderColor: "#8e5ea2",
+				borderColor: "#c1f9ff",
                 borderWidth: 1
             }, {
                 label: 'Woodblock',
                 data: datWoo,
-				borderColor: "#3cba9f",
+				borderColor: "#ffc1c1",
                 borderWidth: 1
             }, {
                 label: 'Average',
@@ -458,16 +500,44 @@ function drawGraph(dat) {
         options: {
             scales: {
                 yAxes: [{
+					scaleLabel: {
+						display: true,
+						labelString: 'Distinguishability'
+					  },
                     ticks: {
-                        beginAtZero:true
-                    }
+                        beginAtZero:true,
+						min: 0, // minimum value
+						max: 4, // maximum value
+						stepSize: 1,
+						callback: function(value, index, values) {
+							return likertList[Math.floor(value)];
+						},
+						fontSize: 15
+                    },
+                }],
+				xAxes: [{
+					scaleLabel: {
+						display: true,
+						labelString: 'Playback frequency'
+					  },
+                    ticks: {               
+						callback: function(value, index, values) {
+							return value+"Hz";
+						},
+						fontSize: 15
+                    },
                 }]
             },
 			title: {
 				display: true,
-				text: 'Distinguishability of individual notes with different playback frequencies'
+				text: 'Distinguishability of individual notes with different playback frequencies',
+				fontSize: 25
+			},
+			legend: {
+				fontSize: 15
 			}
         }
     });
 	console.log(c);
+	document.getElementById("myChart").style.backgroundColor = 'rgba(255,255,255,255)';
 }
