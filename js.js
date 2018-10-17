@@ -29,9 +29,12 @@ var instrumentPaths = [
 var ambiencePaths = [
 	//["https://hgroenenboom.github.io/hku-hearing-test/audio/aestethics_3.mp3", "audio/wav", "audio/mpeg"], 
 	//["https://hgroenenboom.github.io/hku-hearing-test/audio/aestethics_3_h.mp3", "audio/mp3"],
-	['https://hgroenenboom.github.io/HKU-Hearing-test/audio/samples/Backgrounds/162765__dorhel__symphony-orchestra-tuning-before-concert.wav'], 
-	['https://hgroenenboom.github.io/HKU-Hearing-test/audio/samples/Backgrounds/214993__4team__ambient-sound-inside-cafe-dining.wav'], 
-	['https://hgroenenboom.github.io/HKU-Hearing-test/audio/samples/Backgrounds/191350__malupeeters__traffic-mel-1.wav'], 
+	// ['https://hgroenenboom.github.io/HKU-Hearing-test/audio/samples/Backgrounds/162765__dorhel__symphony-orchestra-tuning-before-concert.wav'], 
+	// ['https://hgroenenboom.github.io/HKU-Hearing-test/audio/samples/Backgrounds/214993__4team__ambient-sound-inside-cafe-dining.wav'], 
+	// ['https://hgroenenboom.github.io/HKU-Hearing-test/audio/samples/Backgrounds/191350__malupeeters__traffic-mel-1.wav'], 
+    ['https://hgroenenboom.github.io/HKU-Hearing-test/audio/samples/Backgrounds/orchestra.wav'], 
+	['https://hgroenenboom.github.io/HKU-Hearing-test/audio/samples/Backgrounds/party.wav'], 
+	['https://hgroenenboom.github.io/HKU-Hearing-test/audio/samples/Backgrounds/traffic.wav'], 
 	// ['https://hgroenenboom.github.io/HKU-Hearing-test/audio/samples/Backgrounds/387548__mikikroom__city-milano-traffic-whistle-moto.wav']
 ];
 var buffers = [];
@@ -40,13 +43,6 @@ var buffers = [];
 //instrumentPaths = [instrumentPaths[0]];
 //ambiencePaths = [ambiencePaths[0]];
 //ambiencePaths = [];
-
-// array's containing information while requesting the audio
-var loadingProcessIdentifiers = [0];
-var loadingProcess = [0];
-loadingProcess.length = instrumentPaths.length*2;
-for(var i = 0; i < loadingProcess.length; i++) { loadingProcess[i] = 0; }
-loadingProcessIdentifiers.length = instrumentPaths.length*2;
 
 // variables used for saving all results
 var numResults = 0;
@@ -64,7 +60,7 @@ var pages = ["startscreen", "calibration", "likert", "results"];
 
 // actual values used inside the test
 // the amount of values is a multiplication of the number of samples and the amount of random number generated
-var maxFrequency = 40;
+var maxFrequency = 60;
 var startFrequency = 15;
 var randomGrabber = [];
 for(var i = 0; i < 10; i++) {
@@ -132,7 +128,6 @@ function stateSwitch(e) {
                     ambience.togglePlayback(buffers, 1);
                     break;
                 case "startscreen":
-                    calibrationAudio = new SimpleSound(buffers);
                     calibrationAudio.togglePlayback(document.getElementById("calib_button"), 2);
                     break;
             }
@@ -158,12 +153,17 @@ $(document).ready(function(){
 	
 	// get all soundbuffers as soon as the document is loaded (why?)
 	var allPaths = instrumentPaths.concat(ambiencePaths);
-    calibBuffer = getSoundBuffers([["https://hgroenenboom.github.io/HKU-Hearing-test/audio/calibrationFile.ogg"]]);
+    paths = allPaths.push(["https://hgroenenboom.github.io/HKU-Hearing-test/audio/calibrationFile.ogg"]);
 	buffers = getSoundBuffers(allPaths, true);
 });
 
 // starts after all sounds are loaded
 function documentReadyPart2() {
+    calibBuffer = buffers[buffers.length-1];
+    buffers.pop();
+    console.log([calibBuffer]);
+    console.log(buffers);
+    
 	jQuery("#startscreen_dynamicText")[0].innerHTML = "Press space to continue";
 	
 	// initiate audio elements
@@ -175,30 +175,29 @@ function documentReadyPart2() {
 	}, false);
 	track.connect(gainNode).connect(audioCtx.destination);
 	
+    calibrationAudio = new SimpleSound(calibBuffer);
 	// start audio - necessary?
 	audioCtx.resume();
 }
 
 // functions returns audioBuffers (WebAudio) by getting html's to audio files.
 function getSoundBuffers(soundPaths, shouldWaitTillDone = false) {
-	let buffers = [];
+	let localBuf = [];
+    let loadingProcessIdentifiers = [];
+    let loadingProcess = 0;
 	let isDone = [];
-	buffers.length = soundPaths.length;
     
-	let request = null;
 	for(var i = 0; i < soundPaths.length; i++) {
 		isDone.push(false);
-        if(shouldWaitTillDone) {
-            loadingProcessIdentifiers[i] = soundPaths[i][0];
-		}
+        loadingProcessIdentifiers[i] = soundPaths[i][0];
 		
-		request = new XMLHttpRequest();
+		let request = new XMLHttpRequest();
 		request.open('GET', soundPaths[i][0], true);
 		request.responseType = 'arraybuffer';
 		
 		let showProcess = function (e) {	
 			// console.log("inside showprocess with e.loaded: "+e.loaded / e.total * 100 / (instrumentPaths.length*2));
-			console.log("original url = "+e.srcElement.responseURL);
+			//console.log("original url = "+e.srcElement.responseURL);
 			let n = loadingProcessIdentifiers.indexOf(e.srcElement.responseURL);
 			//console.log("n = "+n);
 			
@@ -226,19 +225,18 @@ function getSoundBuffers(soundPaths, shouldWaitTillDone = false) {
 		request.addEventListener("progress", showProcess);
 		
 		request.onload = function() {
-			console.log("onload:------------------")
 			let n = loadingProcessIdentifiers.indexOf(this.responseURL);
+            console.groupCollapsed(this.responseURL);
+			console.log("onload:------------------")
+            console.log(loadingProcessIdentifiers);
             console.log("\tURL: "+this.responseURL);
 			console.log("\tn = "+n);
 			let audioData = this.response;
 			audioCtx.decodeAudioData(audioData, function(buffer) {
-				buffers[n] = buffer;
-			}, function(e){
-				console.log("\taudiodata: "+audioData);
-				console.log("\tError with decoding audio data" + e.error);
-				console.log("\terror url = "+loadingProcessIdentifiers[n]); });
-			
-            if(shouldWaitTillDone) {
+				localBuf[n] = buffer;
+                console.log(localBuf[n]);
+                
+                if(shouldWaitTillDone) {
                 console.log(isDone);
                 // check if all buffers are loaded
                 isDone[n] = true;
@@ -254,6 +252,13 @@ function getSoundBuffers(soundPaths, shouldWaitTillDone = false) {
                     documentReadyPart2(); 
                 };
             }
+			}, function(e){
+				console.log("\taudiodata: "+audioData);
+				console.log("\tError with decoding audio data" + e.error);
+				console.log("\terror url = "+loadingProcessIdentifiers[n]); 
+            });
+			
+            console.groupEnd();
 		}
 		request.send();
 	}
@@ -262,7 +267,7 @@ function getSoundBuffers(soundPaths, shouldWaitTillDone = false) {
 	console.log(loadingProcessIdentifiers);
     console.log("soundPaths: ");
 	console.log(soundPaths);
-	return buffers;
+	return localBuf;
 }
 
 function likertButtonClicked(e, buttonnum) {
@@ -378,11 +383,14 @@ function Sound(whichPartOfBuffer) {
 	}
 }
 
-function SimpleSound(bufferToPlay, sl = true) { 
+function SimpleSound(bufferToPlay, sl = true) {
+    console.groupCollapsed("SimpleSound created:");
 	this.buf = bufferToPlay;
+    console.log(this.buf);
 	this.src = null;   
 	this.isNowPlaying = false;
     this.shouldLoop = sl;
+    console.groupEnd();
 	
     this.togglePlayback = function(e, mode=3) {
         // mode 1 = stop, mode 2 = start, mode 3 = toggle
@@ -410,11 +418,11 @@ function SimpleSound(bufferToPlay, sl = true) {
 		if(this.src != null) {this.src.stop();}
 		this.src = audioCtx.createBufferSource();
         console.log(this.src);
-        console.log(this.buf[0]);
+        console.log(this.buf);
         
-        this.src.buffer = this.buf[0];
+        this.src.buffer = this.buf;
 		this.src.loop = this.shouldLoop; 
-        this.src.endLoop = this.buf[0].duration;
+        this.src.endLoop = this.buf.duration;
 		this.src.connect(gainNode).connect(audioCtx.destination);
 		this.src.start();
 		this.isNowPlaying = true;
@@ -496,7 +504,7 @@ function drawTable() {
 //      All this will make sure this drawGraph object is able to draw multiple graphs.
 //      It will probably also need params like: dataLabels, dataColours='def', x_axis_label='x', y_axis_label='x', fontsize=20, title='graph', xRange='def' [0,4], yRange='def'[0,4], xTickscallback='def', yTickscallback='def', xsteps='def', ysteps='def'
 // for this example it would be:
-//      drawGraph([[datPia],[datSna],[datWoo],[allData]], ["Piano","Snare","Woodblock","Average"], ['#c1ffca','#c1f9ff','#ffc1c1','#000000'], 'Playback frequency', 'Distinguishability', 20, 'Distinguishability of individual notes with different playback frequencies', 'def', [0,4], function(value, index, values) {return value+"Hz";}, function(value, index, values) {return likertList[Math.floor(value)];}, 'def', 1);
+//      drawGraph([[datPia],[datSna],[datWoo],[allData]], ["Piano","Snare","Woodblock","Average"], ['#8789ff','#c1f9ff','#ffc1c1','#000000'], 'Playback frequency', 'Distinguishability', 20, 'Distinguishability of individual notes with different playback frequencies', 'def', [0,4], function(value, index, values) {return value+"Hz";}, function(value, index, values) {return likertList[Math.floor(value)];}, 'def', 1);
 function drawGraph(dat) {
 	// dat[0] = rating, dat[1] = freq, dat[2] = instrument
 	var accuracy = 4;
@@ -570,23 +578,23 @@ function drawGraph(dat) {
             datasets: [{
                 label: 'Piano',
                 data: datPia,
-				borderColor: "#c1ffca",
-                borderWidth: 1
+				borderColor: "#8789ff",
+                borderWidth: 4
             }, {
                 label: 'Snare',
                 data: datSna,
 				borderColor: "#c1f9ff",
-                borderWidth: 1
+                borderWidth: 4
             }, {
                 label: 'Woodblock',
                 data: datWoo,
 				borderColor: "#ffc1c1",
-                borderWidth: 1
+                borderWidth: 4
             }, {
                 label: 'Average',
                 data: allData,
 				borderColor: "#000000",
-                borderWidth: 1
+                borderWidth: 6
             }
 			]
         },
@@ -615,7 +623,7 @@ function drawGraph(dat) {
 					  },
                     ticks: {               
 						callback: function(value, index, values) {
-							return value+"Hz";
+							return value.toFixed(1)+"Hz";
 						},
 						fontSize: 15
                     },
