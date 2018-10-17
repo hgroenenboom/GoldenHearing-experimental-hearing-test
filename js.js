@@ -53,10 +53,12 @@ var numResults = 0;
 var activeButtonNum = null; // currently active likert button
 var results = []; 
 var chosenAudio = 0;
+
 var instrument = new Sound(0);
 var ambience = new Sound(1);
 var calibBuffer = null;
 var calibrationAudio = null;
+var isAllAudioLoaded = false;
 var state = 0;
 var pages = ["startscreen", "calibration", "likert", "results"];
 
@@ -114,12 +116,13 @@ function stateSwitch(e) {
 	
     console.log("stateSwitch: " + pages[state]);
 	//console.log(document.getElementById("startscreen").classList.contains("visible"));
-    if(state!= pages.length) {
+    if(state!= pages.length && isAllAudioLoaded) {
         if(document.getElementById(pages[state]).classList.contains("visible")) {
             $("#"+pages[state]).addClass('invisible').removeClass("visible");
             $("#"+pages[state+1]).addClass('visible').removeClass("invisible");
             switch(pages[state]) {
                 case "calibration":
+                    calibrationAudio.togglePlayback(document.getElementById("calib_button"), 1);
                     nextTest(true);
                     break;
                 case "likert":
@@ -128,9 +131,9 @@ function stateSwitch(e) {
                     ambience.togglePlayback(buffers, 1);
                     break;
                 case "startscreen":
-                    calibrationAudio.togglePlayback(document.getElementById("calib_button"), 1);
+                    calibrationAudio.togglePlayback(document.getElementById("calib_button"), 2);
+
             }
-            state++;
         }
 	}
 }
@@ -151,8 +154,8 @@ $(document).ready(function(){
 	
 	// get all soundbuffers as soon as the document is loaded (why?)
 	var allPaths = instrumentPaths.concat(ambiencePaths);
-	buffers = getSoundBuffers(allPaths, true);
     calibBuffer = getSoundBuffers([["https://hgroenenboom.github.io/HKU-Hearing-test/audio/calibrationFile.ogg"]]);
+	buffers = getSoundBuffers(allPaths, true);
     calibrationAudio = new SimpleSound(calibBuffer);
 });
 
@@ -244,6 +247,7 @@ function getSoundBuffers(soundPaths, shouldWaitTillDone = false) {
                     console.log("allisloaded");
                     let text = "audioLoadingProcess";
                     document.getElementById(text).innerHTML = "";
+                    isAllAudioLoaded = true;
                     documentReadyPart2(); 
                 };
             }
