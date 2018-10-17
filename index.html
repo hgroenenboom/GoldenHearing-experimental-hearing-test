@@ -32,9 +32,11 @@
         <p class="centered">Calibration:<br> You will hear a sound of someone rubbing their hands before their nose. <br>
         please rub your hands before your nose and adjust the volume inside your headphones so that both volumes match.<br> <br> </p> 
         <div class="centered" style="top:25%;height:55%;">
-            <button id="calib_button" type="button" onclick="calibrationAudio.togglePlayback(this);">Play</button>
-            <input type="range" id="volume" class="control-volume" min="0" max="2" value="1" list="gain-vals" step="0.01" data-action="volume" />
-            <button type="button" onclick="stateSwitch('calib')">Continue</button>
+            <button id="calib_button" type="button" class="button" onclick="calibrationAudio.togglePlayback(this,3);">Play</button>
+            <div class="range-slider">
+            	<input class="range-slider__range" type="range" id="volume" min="0" max="2" value="1" list="gain-vals" step="0.01" data-action="volume">	
+            </div>
+            <button type="button" class="button" onclick="stateSwitch('calib')">Continue</button>
         </div>
     </div>
 	<div id="likert" class="invisible likert centered">
