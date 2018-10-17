@@ -37,9 +37,9 @@ var ambiencePaths = [
 var buffers = [];
 
 // for debugging: only generates one audio settings
-instrumentPaths = [instrumentPaths[0]];
-// ambiencePaths = [ambiencePaths[1]];
-ambiencePaths = [];
+//instrumentPaths = [instrumentPaths[0]];
+//ambiencePaths = [ambiencePaths[1]];
+//ambiencePaths = [];
 
 // array's containing information while requesting the audio
 var loadingProcessIdentifiers = [0];
@@ -55,6 +55,7 @@ var results = [];
 var chosenAudio = 0;
 var instrument = new Sound(0);
 var ambience = new Sound(1);
+var calibBuffer = null;
 var calibrationAudio = null;
 var state = 0;
 var pages = ["startscreen", "calibration", "likert", "results"];
@@ -111,19 +112,23 @@ window.onkeydown = function(e) {
 function stateSwitch(e) {
 	var divs = document.getElementsByTagName('div');
 	
-    console.log("stateSwitch");
+    console.log("stateSwitch: " + pages[state]);
 	//console.log(document.getElementById("startscreen").classList.contains("visible"));
     if(state!= pages.length) {
         if(document.getElementById(pages[state]).classList.contains("visible")) {
             $("#"+pages[state]).addClass('invisible').removeClass("visible");
             $("#"+pages[state+1]).addClass('visible').removeClass("invisible");
-            if(pages[state] == "startscreen") {
-                nextTest(true);
-            }
-            if(pages[state] == "likert") {
-                drawTable();
-                instrument.togglePlayback(buffers, 1);
-                ambience.togglePlayback(buffers, 1);
+            switch(pages[state]) {
+                case "calibration":
+                    nextTest(true);
+                    break;
+                case "likert":
+                    drawTable();
+                    instrument.togglePlayback(buffers, 1);
+                    ambience.togglePlayback(buffers, 1);
+                    break;
+                case "startscreen":
+                    calibrationAudio.togglePlayback(document.getElementById("calib_button"), 1);
             }
             state++;
         }
@@ -146,8 +151,8 @@ $(document).ready(function(){
 	
 	// get all soundbuffers as soon as the document is loaded (why?)
 	var allPaths = instrumentPaths.concat(ambiencePaths);
-	buffers = getSoundBuffers(allPaths);
-    calibBuffer = getSoundBuffers([["https://hgroenenboom.github.io/hku-hearing-test/audio/calibrationFile.ogg"]]);
+	buffers = getSoundBuffers(allPaths, true);
+    calibBuffer = getSoundBuffers([["https://hgroenenboom.github.io/HKU-Hearing-test/audio/calibrationFile.ogg"]]);
     calibrationAudio = new SimpleSound(calibBuffer);
 });
 
@@ -169,16 +174,17 @@ function documentReadyPart2() {
 }
 
 // functions returns audioBuffers (WebAudio) by getting html's to audio files.
-function getSoundBuffers(soundPaths) {
+function getSoundBuffers(soundPaths, shouldWaitTillDone = false) {
 	let buffers = [];
 	let isDone = [];
 	buffers.length = soundPaths.length;
-	
+    
 	let request = null;
 	for(var i = 0; i < soundPaths.length; i++) {
 		isDone.push(false);
-		loadingProcessIdentifiers[i] = soundPaths[i][0];
-		
+        if(shouldWaitTillDone) {
+            loadingProcessIdentifiers[i] = soundPaths[i][0];
+		}
 		
 		request = new XMLHttpRequest();
 		request.open('GET', soundPaths[i][0], true);
@@ -186,9 +192,9 @@ function getSoundBuffers(soundPaths) {
 		
 		let showProcess = function (e) {	
 			// console.log("inside showprocess with e.loaded: "+e.loaded / e.total * 100 / (instrumentPaths.length*2));
-			// console.log("original url = "+e.srcElement.responseURL);
+			console.log("original url = "+e.srcElement.responseURL);
 			let n = loadingProcessIdentifiers.indexOf(e.srcElement.responseURL);
-			// console.log("n = "+n);
+			//console.log("n = "+n);
 			
 			let text = "audioLoadingProcess";
 			if( document.getElementById(text) == null ) {
@@ -206,14 +212,17 @@ function getSoundBuffers(soundPaths) {
 			document.getElementById(text).innerHTML = "loading: "+total+"%";
 		}
 		
-		request.addEventListener("load", function (e){ console.log("\trequest-load");showProcess(e); });
-		request.addEventListener("error", function (e) {console.log("\trequest-error");});
+        if(shouldWaitTillDone) {
+            request.addEventListener("load", function (e){ console.log("\trequest-load");showProcess(e); });
+		}
+        request.addEventListener("error", function (e) {console.log("\trequest-error");});
 		request.addEventListener("abort", function (e) {console.log("\trequest-abort");});
 		request.addEventListener("progress", showProcess);
 		
 		request.onload = function() {
 			console.log("onload:------------------")
 			let n = loadingProcessIdentifiers.indexOf(this.responseURL);
+            console.log("\tURL: "+this.responseURL);
 			console.log("\tn = "+n);
 			let audioData = this.response;
 			audioCtx.decodeAudioData(audioData, function(buffer) {
@@ -223,22 +232,31 @@ function getSoundBuffers(soundPaths) {
 				console.log("\tError with decoding audio data" + e.error);
 				console.log("\terror url = "+loadingProcessIdentifiers[n]); });
 			
-			// check if all buffers are loaded
-			isDone[n] = true;
-			let allIsDone = true;
-			for(var a = 0; a < isDone.length; a++) {
-				if(isDone[a] != true) { allIsDone = false; break; }
-			}
-			if(allIsDone) { documentReadyPart2(); };
+            if(shouldWaitTillDone) {
+                console.log(isDone);
+                // check if all buffers are loaded
+                isDone[n] = true;
+                let allIsDone = true;
+                for(var a = 0; a < isDone.length; a++) {
+                    if(isDone[a] != true) { allIsDone = false; break; }
+                }
+                if(allIsDone ) { 
+                    console.log("allisloaded");
+                    let text = "audioLoadingProcess";
+                    document.getElementById(text).innerHTML = "";
+                    documentReadyPart2(); 
+                };
+            }
 		}
 		request.send();
 	}
 	
 	console.log("loadingProcessIdentifiers: ");
 	console.log(loadingProcessIdentifiers);
+    console.log("soundPaths: ");
+	console.log(soundPaths);
 	return buffers;
 }
-
 
 function likertButtonClicked(e, buttonnum) {
 	if ( e.classList.contains("buttonOn")) {
@@ -361,6 +379,8 @@ function SimpleSound(bufferToPlay, shouldLoop = true) {
 	
     this.togglePlayback = function(e, mode=3) {
         // mode 1 = stop, mode 2 = start, mode 3 = toggle
+        console.log(e);
+        console.log(mode);
         
         if(mode==2) {
             this.play();
@@ -380,9 +400,13 @@ function SimpleSound(bufferToPlay, shouldLoop = true) {
     }
 	
 	this.play = function() {
-		if(this.source) {this.source.stop();}
+		if(this.source != null) {this.source.stop();}
 		this.source = audioCtx.createBufferSource();
-		this.source.loop = shouldLoop; 
+        console.log(this.source);
+        console.log(this.buffer);
+        
+        this.source.buffer = this.buffer[0];
+		this.source.loop = this.shouldLoop; 
 		this.source.connect(gainNode).connect(audioCtx.destination);
 		this.source.start();
 		this.isplaying = true;

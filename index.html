@@ -11,7 +11,7 @@
 </head>
 <body>
 	v 1.2
-	<div id="startscreen" class="visible centered" onclick="stateSwitch(this)">
+	<div id="startscreen" class="visible centered">
         <div id="intro" style="top:0%;height=40%">   
             <h1 class="centered" style="font-size:40px;"> Welcome to the HKU and LUMC hearing test. </h1>
             <p style="font-size:20px;">This test will test your <i>temporal resolution</i><br>
@@ -25,13 +25,17 @@
     For scientificly confirmed indication of temporal hearing loss we recommend using a <i>GAP detection</i>.<br>
     The outcomes of this test will be used to see if test in regular listening enviroments can add value to the already clinical tests.<br><br></p>
         </div>
-        <div id="startscreen_dynamicText" style="top:60%; height:40%;">
-		Click space to continue
+        <div id="startscreen_dynamicText" style="top:80%; height:20%;">Please wait till all sounds have been loaded
         </div>
 	</div>
-    <div id="calibration" class="invisible centered" >
-        Calibration
-        <button id="calib_button" type="button" onclick="calibrationAudio.togglePlayback(3);">Play</button>
+    <div id="calibration" class="invisible" >
+        <p class="centered">Calibration:<br> You will hear a sound of someone rubbing their hands before their nose. <br>
+        please rub your hands before your nose and adjust the volume inside your headphones so that both volumes match.<br> <br> </p> 
+        <div class="centered" style="top:25%;height:55%;">
+            <button id="calib_button" type="button" onclick="calibrationAudio.togglePlayback(this,3);">Play</button>
+            <input type="range" id="volume" class="control-volume" min="0" max="2" value="1" list="gain-vals" step="0.01" data-action="volume" />
+            <button type="button" onclick="stateSwitch('calib')">Continue</button>
+        </div>
     </div>
 	<div id="likert" class="invisible likert centered">
 		<div>
@@ -51,8 +55,6 @@
 				<audio id="likert_audio_control" class="invisible">
 				Your browser does not support the audio element.
 				</audio> 
-				
-				<input type="range" id="volume" class="control-volume" min="0" max="2" value="1" list="gain-vals" step="0.01" data-action="volume" />
 				
 				<!-- <button id="show_results" type="button" onclick="stateSwitch('show results')">Show results</button> -->
 			</div>
