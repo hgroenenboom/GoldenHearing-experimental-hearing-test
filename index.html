@@ -42,7 +42,7 @@
 	<div id="likert" class="invisible likert centered">
 		<div>
 			<p>How well can you distinguish the individual notes of the played instrument? </p>
-			<div id="likertbuttons" style="top:100px,height=300px,position=relative">
+			<div id="likertbuttons">
 				<button id="likert_0_button" type="button" class="button buttonOff" onclick="likertButtonClicked(this, 0)">Not at all</button>
 				<button id="likert_1_button" type="button" class="button buttonOff" onclick="likertButtonClicked(this, 1)">Poor</button>
 				<button id="likert_2_button" type="button" class="button buttonOff" onclick="likertButtonClicked(this, 2)">Neutral</button>
@@ -50,7 +50,7 @@
 				<button id="likert_4_button" type="button" class="button buttonOff" onclick="likertButtonClicked(this, 4)">Very good</button>
 			</div>
 			
-			<div class="bottomhalf">
+			<div>
 				<!-- <button id="next_file_button" type="button" onclick="nextTest();" disabled="disabled"">Next sound</button> -->
 				<button id="play_sound_button" type="button" class="button" onclick="instrument.togglePlayback(buffers, 3, true);ambience.togglePlayback(buffers, 3, true)">Stop sound</button>
 				

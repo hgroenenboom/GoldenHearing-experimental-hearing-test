@@ -6,7 +6,7 @@
 // Version
 console.log("v 1.2");
 
-// get context
+// get audiocontext (WebAudio)
 const AudioContext = window.AudioContext || window.webkitAudioContext;
 const audioCtx = new AudioContext();
 
@@ -132,12 +132,14 @@ function stateSwitch(e) {
                     ambience.togglePlayback(buffers, 1);
                     break;
                 case "startscreen":
+                    calibrationAudio = new SimpleSound(buffers);
                     calibrationAudio.togglePlayback(document.getElementById("calib_button"), 2);
                     break;
             }
             state++;
         }
 	}
+    console.log("newstate: "+pages[state]); 
 }
 
 likertList = ["Not at all", "Slightly", "Moderately", "Very", "Extremely"];
@@ -250,8 +252,6 @@ function getSoundBuffers(soundPaths, shouldWaitTillDone = false) {
                     document.getElementById(text).innerHTML = "";
                     isAllAudioLoaded = true;
                     documentReadyPart2(); 
-                    
-                    calibrationAudio = new SimpleSound(calibBuffer);
                 };
             }
 		}
@@ -378,11 +378,11 @@ function Sound(whichPartOfBuffer) {
 	}
 }
 
-function SimpleSound(bufferToPlay, shouldLoop = true) { 
-	this.buffer = bufferToPlay;
-	this.source = null;   
-	this.isplaying = false;
-    this.shouldLoop = shouldLoop;
+function SimpleSound(bufferToPlay, sl = true) { 
+	this.buf = bufferToPlay;
+	this.src = null;   
+	this.isNowPlaying = false;
+    this.shouldLoop = sl;
 	
     this.togglePlayback = function(e, mode=3) {
         // mode 1 = stop, mode 2 = start, mode 3 = toggle
@@ -396,7 +396,7 @@ function SimpleSound(bufferToPlay, shouldLoop = true) {
             this.stop();
             e.innerHTML = "Start sound";
         } else if (mode==3) {
-			if(this.isplaying) {
+			if(this.isNowPlaying) {
 				this.stop();
 				e.innerHTML = "Start sound";
 			} else {
@@ -407,22 +407,23 @@ function SimpleSound(bufferToPlay, shouldLoop = true) {
     }
 	
 	this.play = function() {
-		if(this.source != null) {this.source.stop();}
-		this.source = audioCtx.createBufferSource();
-        console.log(this.source);
-        console.log(this.buffer);
+		if(this.src != null) {this.src.stop();}
+		this.src = audioCtx.createBufferSource();
+        console.log(this.src);
+        console.log(this.buf);
         
-        this.source.buffer = this.buffer[0];
-		this.source.loop = this.shouldLoop; 
-		this.source.connect(gainNode).connect(audioCtx.destination);
-		this.source.start();
-		this.isplaying = true;
+        this.src.buffer = this.buf[0];
+		this.src.loop = this.shouldLoop; 
+        this.src.endLoop = this.buf[0].duration;
+		this.src.connect(gainNode).connect(audioCtx.destination);
+		this.src.start();
+		this.isNowPlaying = true;
 	}
 	
 	this.stop = function() {
-		this.source.stop();
-		this.isplaying = false;
-        console.log("isplaying: "+ this.isplaying);
+		this.src.stop();
+		this.isNowPlaying = false;
+        console.log("isNowPlaying: "+ this.isNowPlaying);
 	}
 }
 
