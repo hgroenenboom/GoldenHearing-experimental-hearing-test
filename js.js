@@ -55,8 +55,9 @@ var results = [];
 var chosenAudio = 0;
 var instrument = new Sound(0);
 var ambience = new Sound(1);
+var calibrationAudio = null;
 var state = 0;
-var pages = ["startscreen", "likert", "results"];
+var pages = ["startscreen", "calibration", "likert", "results"];
 
 // actual values used inside the test
 // the amount of values is a multiplication of the number of samples and the amount of random number generated
@@ -100,12 +101,17 @@ window.onkeydown = function(e) {
             nextTest();
         }
     }
+    // overload stateswitch with 'a'
+    if(e.keyCode == 65) {
+        stateSwitch("lol");
+    }
 }
 
 // switch between document states of the test (hoe werkt dit bij andere websites?)
 function stateSwitch(e) {
 	var divs = document.getElementsByTagName('div');
 	
+    console.log("stateSwitch");
 	//console.log(document.getElementById("startscreen").classList.contains("visible"));
     if(state!= pages.length) {
         if(document.getElementById(pages[state]).classList.contains("visible")) {
@@ -138,10 +144,11 @@ $(document).ready(function(){
 		}
 	}
 	
-	
 	// get all soundbuffers as soon as the document is loaded (why?)
 	var allPaths = instrumentPaths.concat(ambiencePaths);
 	buffers = getSoundBuffers(allPaths);
+    calibBuffer = getSoundBuffers([["https://hgroenenboom.github.io/hku-hearing-test/audio/calibrationFile.ogg"]]);
+    calibrationAudio = new SimpleSound(calibBuffer);
 });
 
 // starts after all sounds are loaded
@@ -163,11 +170,11 @@ function documentReadyPart2() {
 
 // functions returns audioBuffers (WebAudio) by getting html's to audio files.
 function getSoundBuffers(soundPaths) {
-	var buffers = [];
-	var isDone = [];
+	let buffers = [];
+	let isDone = [];
 	buffers.length = soundPaths.length;
 	
-	var request = null;
+	let request = null;
 	for(var i = 0; i < soundPaths.length; i++) {
 		isDone.push(false);
 		loadingProcessIdentifiers[i] = soundPaths[i][0];
@@ -177,22 +184,22 @@ function getSoundBuffers(soundPaths) {
 		request.open('GET', soundPaths[i][0], true);
 		request.responseType = 'arraybuffer';
 		
-		var showProcess = function (e) {	
+		let showProcess = function (e) {	
 			// console.log("inside showprocess with e.loaded: "+e.loaded / e.total * 100 / (instrumentPaths.length*2));
 			// console.log("original url = "+e.srcElement.responseURL);
-			var n = loadingProcessIdentifiers.indexOf(e.srcElement.responseURL);
+			let n = loadingProcessIdentifiers.indexOf(e.srcElement.responseURL);
 			// console.log("n = "+n);
 			
-			var text = "audioLoadingProcess";
+			let text = "audioLoadingProcess";
 			if( document.getElementById(text) == null ) {
 				$( "<div id='"+text+"' class='centered bottomhalf'></div> " ).appendTo( jQuery("#startscreen_dynamicText") );
 			} 
 			
-			var val = e.loaded / e.total * 100 / (instrumentPaths.length*2);
+			let val = e.loaded / e.total * 100 / (instrumentPaths.length*2);
 			if(val != NaN) {loadingProcess[n] = val;} else {loadingProcess[n] = 0;}
 			// console.log("inside showprocess with loadingprocess: " + loadingProcess);
 			
-			var total = 0
+			let total = 0
 			for(var j = 0; j < loadingProcess.length; j++) {
 				total += loadingProcess[j];
 			}
@@ -206,9 +213,9 @@ function getSoundBuffers(soundPaths) {
 		
 		request.onload = function() {
 			console.log("onload:------------------")
-			var n = loadingProcessIdentifiers.indexOf(this.responseURL);
+			let n = loadingProcessIdentifiers.indexOf(this.responseURL);
 			console.log("\tn = "+n);
-			var audioData = this.response;
+			let audioData = this.response;
 			audioCtx.decodeAudioData(audioData, function(buffer) {
 				buffers[n] = buffer;
 			}, function(e){
@@ -218,7 +225,7 @@ function getSoundBuffers(soundPaths) {
 			
 			// check if all buffers are loaded
 			isDone[n] = true;
-			var allIsDone = true;
+			let allIsDone = true;
 			for(var a = 0; a < isDone.length; a++) {
 				if(isDone[a] != true) { allIsDone = false; break; }
 			}
@@ -335,6 +342,47 @@ function Sound(whichPartOfBuffer) {
 		if(this.frequency != null) {
 			this.source.loopEnd = 1 / this.frequency;
 		}
+		this.source.connect(gainNode).connect(audioCtx.destination);
+		this.source.start();
+		this.isplaying = true;
+	}
+	
+	this.stop = function() {
+		this.source.stop();
+		this.isplaying = false;
+	}
+}
+
+function SimpleSound(bufferToPlay, shouldLoop = true) { 
+	this.buffer = bufferToPlay;
+	this.source = null;   
+	this.isplaying = false;
+    this.shouldLoop = shouldLoop;
+	
+    this.togglePlayback = function(e, mode=3) {
+        // mode 1 = stop, mode 2 = start, mode 3 = toggle
+        
+        if(mode==2) {
+            this.play();
+            e.innerHTML = "Stop sound";
+        } else if (mode==1) {
+            this.stop();
+            e.innerHTML = "Start sound";
+        } else if (mode==3) {
+			if(this.isplaying) {
+				this.stop(shouldLoop);
+				e.innerHTML = "Start sound";
+			} else {
+				this.play(buffers, shouldLoop);
+				e.innerHTML = "Stop sound";
+			}
+		}
+    }
+	
+	this.play = function() {
+		if(this.source) {this.source.stop();}
+		this.source = audioCtx.createBufferSource();
+		this.source.loop = shouldLoop; 
 		this.source.connect(gainNode).connect(audioCtx.destination);
 		this.source.start();
 		this.isplaying = true;
