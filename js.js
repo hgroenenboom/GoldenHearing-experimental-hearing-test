@@ -37,8 +37,9 @@ var ambiencePaths = [
 var buffers = [];
 
 // for debugging: only generates one audio settings
-// instrumentPaths = [instrumentPaths[1]];
+instrumentPaths = [instrumentPaths[0]];
 // ambiencePaths = [ambiencePaths[1]];
+ambiencePaths = [];
 
 // array's containing information while requesting the audio
 var loadingProcessIdentifiers = [0];
@@ -57,7 +58,7 @@ var ambience = new Sound(1);
 
 // actual values used inside the test
 // the amount of values is a multiplication of the number of samples and the amount of random number generated
-var maxFrequency = 30;
+var maxFrequency = 40;
 var startFrequency = 15;
 var randomGrabber = [];
 for(var i = 0; i < 10; i++) {
@@ -76,7 +77,7 @@ randomGrabber = d3.shuffle(randomGrabber);
 var keys = {};
 window.onkeyup = function(e) { keys[e.keyCode] = false; }
 window.onkeydown = function(e) {
-    //console.log(e.keyCode);
+    console.log(e.keyCode);
     keys[e.keyCode] = true;
     if(e.keyCode == 32) {
         stateSwitch(e);
@@ -101,8 +102,8 @@ window.onkeydown = function(e) {
 function stateSwitch(e) {
 	var divs = document.getElementsByTagName('div');
 	
-	console.log(document.getElementById("startscreen").classList.contains("visible"));
-	if(document.getElementById("startscreen").classList.contains("visible") && document.getElementById("startscreen").innerHTML == "Press space to continue") {
+	//console.log(document.getElementById("startscreen").classList.contains("visible"));
+	if(document.getElementById("startscreen").classList.contains("visible")) {
 		$("#startscreen").addClass('invisible').removeClass("visible");
 		$("#likert").addClass('visible').removeClass("invisible");
 		nextTest(true);
@@ -119,7 +120,7 @@ function stateSwitch(e) {
 
 likertList = ["Not at all", "Slightly", "Moderately", "Very", "Extremely"];
 $(document).ready(function(){
-	jQuery("#startscreen")[0].innerHTML = "please wait till all audio has been loaded";
+	jQuery("#startscreen_dynamicText")[0].innerHTML = "please wait till all audio has been loaded";
 	
 	var buttons = document.getElementsByTagName('button');
 	for(var i = 0; i < buttons.length; i++) {
@@ -139,7 +140,7 @@ $(document).ready(function(){
 
 // starts after all sounds are loaded
 function documentReadyPart2() {
-	jQuery("#startscreen")[0].innerHTML = "Press space to continue";
+	jQuery("#startscreen_dynamicText")[0].innerHTML = "Press space to continue";
 	
 	// initiate audio elements
     audioElement = document.querySelector("audio");
@@ -178,7 +179,7 @@ function getSoundBuffers(soundPaths) {
 			
 			var text = "audioLoadingProcess";
 			if( document.getElementById(text) == null ) {
-				$( "<div id='"+text+"' class='centered bottomhalf'></div> " ).appendTo( jQuery("#startscreen") );
+				$( "<div id='"+text+"' class='centered bottomhalf'></div> " ).appendTo( jQuery("#startscreen_dynamicText") );
 			} 
 			
 			var val = e.loaded / e.total * 100 / (instrumentPaths.length*2);
