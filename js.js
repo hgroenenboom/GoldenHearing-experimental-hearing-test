@@ -4,7 +4,7 @@
 // - d3
 
 // Version
-console.log("v 1.1");
+console.log("v 1.2");
 
 // get context
 const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -55,6 +55,8 @@ var results = [];
 var chosenAudio = 0;
 var instrument = new Sound(0);
 var ambience = new Sound(1);
+var state = 0;
+var pages = ["startscreen", "likert", "results"];
 
 // actual values used inside the test
 // the amount of values is a multiplication of the number of samples and the amount of random number generated
@@ -80,9 +82,11 @@ window.onkeydown = function(e) {
     console.log(e.keyCode);
     keys[e.keyCode] = true;
     if(e.keyCode == 32) {
-        stateSwitch(e);
+        if(pages[state] == 'startscreen') {
+            stateSwitch(e);
+        }
     }
-    if((e.keyCode >= 48 && e.keyCode <= 57) || (e.keyCode >= 96 && e.keyCode <= 105)) {
+    if( ((e.keyCode >= 48 && e.keyCode <= 57) || (e.keyCode >= 96 && e.keyCode <= 105) ) && pages[state] == 'likert') {
         var key =  e.keyCode % 48;
         
         if(key > 0 && key <= 5) {
@@ -103,18 +107,20 @@ function stateSwitch(e) {
 	var divs = document.getElementsByTagName('div');
 	
 	//console.log(document.getElementById("startscreen").classList.contains("visible"));
-	if(document.getElementById("startscreen").classList.contains("visible")) {
-		$("#startscreen").addClass('invisible').removeClass("visible");
-		$("#likert").addClass('visible').removeClass("invisible");
-		nextTest(true);
-	}
-	if((keys[32] || e=="show results") && results.length != 0 ) {
-		$("#likert").addClass('invisible').removeClass("visible");
-        drawTable();
-        instrument.togglePlayback(buffers, 1);
-		ambience.togglePlayback(buffers, 1);
-		$("#results").addClass('visible').removeClass("invisible");
-		return;
+    if(state!= pages.length) {
+        if(document.getElementById(pages[state]).classList.contains("visible")) {
+            $("#"+pages[state]).addClass('invisible').removeClass("visible");
+            $("#"+pages[state+1]).addClass('visible').removeClass("invisible");
+            if(pages[state] == "startscreen") {
+                nextTest(true);
+            }
+            if(pages[state] == "likert") {
+                drawTable();
+                instrument.togglePlayback(buffers, 1);
+                ambience.togglePlayback(buffers, 1);
+            }
+            state++;
+        }
 	}
 }
 
