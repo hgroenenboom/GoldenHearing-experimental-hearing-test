@@ -410,7 +410,7 @@ function SimpleSound(bufferToPlay, sl = true) {
 		if(this.src != null) {this.src.stop();}
 		this.src = audioCtx.createBufferSource();
         console.log(this.src);
-        console.log(this.buf);
+        console.log(this.buf[0]);
         
         this.src.buffer = this.buf[0];
 		this.src.loop = this.shouldLoop; 
@@ -428,8 +428,6 @@ function SimpleSound(bufferToPlay, sl = true) {
 }
 
 function drawTable() {
-    
-    //document.getElementById("how to change text in html").innerHTML = "nieuwe text";
 
     data = "All data: ["
     for (var i = 0; i < results.length; i++) {
@@ -440,7 +438,7 @@ function drawTable() {
     }
     data += "]"
     
-    console.log(data);
+    //console.log(data);
     jQuery("#how_to_change_text_in_html")[0].innerHTML = data;
     
     /////////////////////////////////////////////////////////
@@ -492,10 +490,17 @@ function drawTable() {
     drawGraph(results);
 }
 
+// TODO:
+// create data elements outside of drawGraph, make drawGraphs argument MDArray. (example: [[data], [data2], [data3]])
+// use forloop to iterate through data and to show in graph. 
+//      All this will make sure this drawGraph object is able to draw multiple graphs.
+//      It will probably also need params like: dataLabels, dataColours='def', x_axis_label='x', y_axis_label='x', fontsize=20, title='graph', xRange='def' [0,4], yRange='def'[0,4], xTickscallback='def', yTickscallback='def', xsteps='def', ysteps='def'
+// for this example it would be:
+//      drawGraph([[datPia],[datSna],[datWoo],[allData]], ["Piano","Snare","Woodblock","Average"], ['#c1ffca','#c1f9ff','#ffc1c1','#000000'], 'Playback frequency', 'Distinguishability', 20, 'Distinguishability of individual notes with different playback frequencies', 'def', [0,4], function(value, index, values) {return value+"Hz";}, function(value, index, values) {return likertList[Math.floor(value)];}, 'def', 1);
 function drawGraph(dat) {
 	// dat[0] = rating, dat[1] = freq, dat[2] = instrument
 	var accuracy = 4;
-	console.log(dat);
+	//console.log(dat);
 	datPia = [];
 	datSna = [];
 	datWoo = [];
