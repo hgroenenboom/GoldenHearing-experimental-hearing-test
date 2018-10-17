@@ -132,7 +132,7 @@ function stateSwitch(e) {
                     break;
                 case "startscreen":
                     calibrationAudio.togglePlayback(document.getElementById("calib_button"), 2);
-
+            state++;
             }
         }
 	}
