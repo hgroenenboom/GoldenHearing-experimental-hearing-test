@@ -38,7 +38,7 @@ var buffers = [];
 
 // for debugging: only generates one audio settings
 //instrumentPaths = [instrumentPaths[0]];
-//ambiencePaths = [ambiencePaths[1]];
+//ambiencePaths = [ambiencePaths[0]];
 //ambiencePaths = [];
 
 // array's containing information while requesting the audio
@@ -91,6 +91,7 @@ window.onkeydown = function(e) {
         }
     }
     if( ((e.keyCode >= 48 && e.keyCode <= 57) || (e.keyCode >= 96 && e.keyCode <= 105) ) && pages[state] == 'likert') {
+        console.log("likert pressed");
         var key =  e.keyCode % 48;
         
         if(key > 0 && key <= 5) {
@@ -132,8 +133,9 @@ function stateSwitch(e) {
                     break;
                 case "startscreen":
                     calibrationAudio.togglePlayback(document.getElementById("calib_button"), 2);
-            state++;
+                    break;
             }
+            state++;
         }
 	}
 }
@@ -156,7 +158,6 @@ $(document).ready(function(){
 	var allPaths = instrumentPaths.concat(ambiencePaths);
     calibBuffer = getSoundBuffers([["https://hgroenenboom.github.io/HKU-Hearing-test/audio/calibrationFile.ogg"]]);
 	buffers = getSoundBuffers(allPaths, true);
-    calibrationAudio = new SimpleSound(calibBuffer);
 });
 
 // starts after all sounds are loaded
@@ -249,6 +250,8 @@ function getSoundBuffers(soundPaths, shouldWaitTillDone = false) {
                     document.getElementById(text).innerHTML = "";
                     isAllAudioLoaded = true;
                     documentReadyPart2(); 
+                    
+                    calibrationAudio = new SimpleSound(calibBuffer);
                 };
             }
 		}
@@ -394,10 +397,10 @@ function SimpleSound(bufferToPlay, shouldLoop = true) {
             e.innerHTML = "Start sound";
         } else if (mode==3) {
 			if(this.isplaying) {
-				this.stop(shouldLoop);
+				this.stop();
 				e.innerHTML = "Start sound";
 			} else {
-				this.play(buffers, shouldLoop);
+				this.play();
 				e.innerHTML = "Stop sound";
 			}
 		}
@@ -419,6 +422,7 @@ function SimpleSound(bufferToPlay, shouldLoop = true) {
 	this.stop = function() {
 		this.source.stop();
 		this.isplaying = false;
+        console.log("isplaying: "+ this.isplaying);
 	}
 }
 
