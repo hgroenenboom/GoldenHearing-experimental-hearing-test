@@ -1,0 +1,5 @@
+1 uitklinktijd
+2 EQ
+3 dynamics (punch / attack)
+4 mid side gain
+5 gain
