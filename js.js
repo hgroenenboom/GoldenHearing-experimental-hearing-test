@@ -78,10 +78,10 @@ randomGrabber = d3.shuffle(randomGrabber);
 // handle all keyboard input (a bit chaotic still)
 var keys = {};
 window.onkeyup = function(e) { keys[e.keyCode] = false; }
-window.onkeydown = function(e) {
+function handleInput(e) {
     console.log(e.keyCode);
     keys[e.keyCode] = true;
-    if(e.keyCode == 32) {
+    if(e.keyCode == 32 || true || e == "mouseclick") {
         if(pages[state] == 'startscreen') {
             stateSwitch(e);
         }
@@ -106,6 +106,7 @@ window.onkeydown = function(e) {
         stateSwitch("lol");
     }
 }
+window.onkeydown = handleInput;
 
 // switch between document states of the test (hoe werkt dit bij andere websites?)
 function stateSwitch(e) {
@@ -137,6 +138,10 @@ function stateSwitch(e) {
     console.log("newstate: "+pages[state]); 
 }
 
+function mouseClicked() {
+    handleInput("mouseclick");
+}
+
 likertList = ["Not at all", "Slightly", "Moderately", "Very", "Extremely"];
 $(document).ready(function(){
 	jQuery("#startscreen_dynamicText")[0].innerHTML = "please wait till all audio has been loaded";
@@ -164,7 +169,8 @@ function documentReadyPart2() {
     console.log([calibBuffer]);
     console.log(buffers);
     
-	jQuery("#startscreen_dynamicText")[0].innerHTML = "Press space to continue";
+	jQuery("#startscreen_dynamicText")[0].innerHTML = "Press any button or tap/click screen to continue";
+    jQuery("#startscreen_dynamicText")[0].style.color = "Blue";
 	
 	// initiate audio elements
     audioElement = document.querySelector("audio");
