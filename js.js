@@ -108,6 +108,12 @@ function handleInput(e) {
 }
 window.onkeydown = handleInput;
 
+$(window).resize( function(){
+  if(state == 3) {
+    drawGraph(results);
+  }
+});
+
 // switch between document states of the test (hoe werkt dit bij andere websites?)
 function stateSwitch(e) {
 	var divs = document.getElementsByTagName('div');
@@ -333,6 +339,7 @@ function nextTest(override = false) {
 		ambience.play(buffers);
 		console.log(""+instrument.frequency+ " - " +chosenAudio);
 	}
+    jQuery("#testTitle")[0].innerHTML = "Hearing test ("+numResults+"/"+randomGrabber.length+")";
 	
 	if(results.length >= randomGrabber.length) {
 		stateSwitch("show results");
@@ -574,9 +581,14 @@ function drawGraph(dat) {
 	}
 	console.log(lab);
 	
+    scaleY = $(window).height() / 1080;
+    scaleX = $(window).width() / 1920;
+    scale = Math.min(scaleX, scaleY);
+    console.log("scale = "+scale);
+    
     //var Chart = require('chart.js'); 
 	Chart.defaults.global.elements.line.fill = false;
-	Chart.defaults.global.defaultFontSize = 25;
+	Chart.defaults.global.defaultFontSize = scale*25;
     var c = new Chart(document.getElementById("myChart"), {
         type: 'line',
         data: {
@@ -585,22 +597,22 @@ function drawGraph(dat) {
                 label: 'Piano',
                 data: datPia,
 				borderColor: "#8789ff",
-                borderWidth: 4
+                borderWidth: scale*4
             }, {
                 label: 'Snare',
                 data: datSna,
 				borderColor: "#c1f9ff",
-                borderWidth: 4
+                borderWidth: scale*4
             }, {
                 label: 'Woodblock',
                 data: datWoo,
 				borderColor: "#ffc1c1",
-                borderWidth: 4
+                borderWidth: scale*4
             }, {
                 label: 'Average',
                 data: allData,
 				borderColor: "#000000",
-                borderWidth: 6
+                borderWidth: scale*6
             }
 			]
         },
@@ -619,7 +631,7 @@ function drawGraph(dat) {
 						callback: function(value, index, values) {
 							return likertList[Math.floor(value)];
 						},
-						fontSize: 15
+						fontSize: scale*15
                     },
                 }],
 				xAxes: [{
@@ -631,17 +643,17 @@ function drawGraph(dat) {
 						callback: function(value, index, values) {
 							return value.toFixed(1)+"Hz";
 						},
-						fontSize: 15
+						fontSize: scale*15
                     },
                 }]
             },
 			title: {
 				display: true,
 				text: 'Distinguishability of individual notes with different playback frequencies',
-				fontSize: 25
+				fontSize: scale*25
 			},
 			legend: {
-				fontSize: 15
+				fontSize: scale*15
 			}
         }
     });

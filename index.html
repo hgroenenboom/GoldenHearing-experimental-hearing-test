@@ -1,96 +1,118 @@
 <!DOCTYPE html>
 <html>
-<head>
-	<link rel="stylesheet" href="css.css">
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-    <script src="Chart.bundle.js"></script>
-	<script src="Chart.bundle.min.js"></script>
-	<script src="https://d3js.org/d3.v5.js"></script>
-	<script type="text/javascript" src="js.js"></script>
-	<title>Hearing test</title>
-</head>
-<body onmousedown=mouseClicked()>
-	<div id="startscreen" class="visible">
-        <div id="intro" style="height=100%">
-            <div class="navbar">
-                <div id='navbar-topcenter' class="centered title"> Temporal Resolution Hearing Test
-                </div>
-                <div id='navbar-topright' class="centered navbartextspace">
-                    <h6 class="centered navbartext" style="float:left;"> 
+    <head>
+        <!-- Prevent incorrect caching of js, css, or html files, by explicitly storing no cache -->
+        <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
+        <meta http-equiv="Pragma" content="no-cache"/>
+        <meta http-equiv="Expires" content="0"/>
+        
+        <link rel="stylesheet" href="css.css?version=420">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+        <script src="Chart.bundle.js"></script>
+        <script src="Chart.bundle.min.js"></script>
+        <script src="https://d3js.org/d3.v5.js"></script>
+        <script type="text/javascript" src="js.js?version=420"></script>
+        <title>Hearing test</title>
+    </head>
+    <body onmousedown=mouseClicked()>
+        <div id="navigationbar" class="navbar">
+            <div id='navbar-topcenter' class="centered title"> Temporal Resolution Hearing Test
+            </div>
+            <div id='navbar-topright' class="centered navbartextspace">
+                <h6 class="centered navbartext" style="float:left;"> 
                     by Harold Groenenboom 
                     &amp; 
                     Nick Verbeek
-                    </h6> 
-                    <div class="vl" style="float:left;background-color:black;"> </div>
-                    <h6 class="centered navbartext" style="float:left">
-                        in collaboration with: 
-                        University of the Arts Utrecht 
-                        &amp; 
-                        Golden Hearing LUMC. 
-                    </h6>
-                </div>
-                <div id='navbar-topleft' class="" style="left:1px; width:19vw">
-                    <h6 class=" navbartext" style="float:left;"> 
+                </h6> 
+                <div class="vl" style="float:left;background-color:black;"> </div>
+                <h6 class="centered navbartext" style="float:left">
+                    in collaboration with: 
+                    University of the Arts Utrecht 
+                    &amp; 
+                    Golden Hearing LUMC. 
+                </h6>
+            </div>
+            <div id='navbar-topleft' class="" style="left:1px; width:19vw">
+                <h6 class=" navbartext" style="float:left;"> 
                     v 1.2.1
-                    </h6> 
+                </h6> 
+            </div>
+        </div>
+        <!------------------ NAVIGATION BAR ---------------------->
+        
+        <div id="inhoud" style="height:calc(100% - 75px);">
+            <div id="startscreen" class="visible">
+                <div id="intro" style="height=100%">
+                    <div class="maininhoud">
+                        <p id="startscreen_dynamicText" style="color:Red;" onclick="stateSwitch()">Please wait till all sounds have been loaded</p>
+                        <p>This experimental test will test your <i>temporal resolution</i>
+                            Consecutive instrument notes will be played in a rapid succession. You have to answer how well you can distinguish these individual notes.
+                            At the end of the test you will get an indication on how well you can distinguish sounds on different playback frequencies. Results of this test should be combined with results from accurate Temporal Resolution tests. With this combined information we hope to gain more insight on the impact of temporal hearing loss.<br><br>
+                            
+                            Notes:
+                        Since this test is experimental and is still under development results shouldn't be interpreted as being correct, for this more research is required. For a proven indication of temporal hearing loss we recommend using a <i>GAP detection test</i>. The outcomes of this test will be used to see if hearing tests in normal listening enviroments can add value to the already existing clinical tests with analytical sounds.<br><br></p>
+                    </div>
                 </div>
             </div>
-            <div class="maininhoud">
-                <p id="startscreen_dynamicText" style="color:Red;" onclick="stateSwitch()">Please wait till all sounds have been loaded</p>
-                <p>This experimental test will test your <i>temporal resolution</i>
-                Consecutive instrument notes will be played in a rapid succession. You have to answer how well you can distinguish these individual notes.
-                At the end of the test you will get an indication on how well you can distinguish sounds on different playback frequencies. Results of this test should be combined with results from accurate Temporal Resolution tests. With this combined information we hope to gain more insight on the impact of temporal hearing loss.<br><br>
-
-                Notes:
-                This test is experimental and is still under development.<br>
-                For scientificly confirmed indication of temporal hearing loss we recommend using a <i>GAP detection</i>.<br>
-                The outcomes of this test will be used to see if test in regular listening enviroments can add value to the already clinical tests.<br><br></p>
-            </div><!-- Main inhoud -->
-        </div>
-        
-	</div>
-    <div id="calibration" class="invisible" >
-        <p class="centered">Calibration:<br> You will hear a sound of someone rubbing their hands before their nose. <br>
-        please rub your hands before your nose and adjust the volume inside your headphones so that both volumes match.<br> <br> </p> 
-        <div class="centered" style="top:25%;height:55%;">
-            <div class="range-slider">
-            	<input class="range-slider__range" type="range" id="volume" min="0" max="2" value="1" list="gain-vals" step="0.01" data-action="volume">	
+            <!--------------------- STARTSCREEN ---------------------->
+            
+            <div id="calibration" class="invisible" >
+                <div class="simpleoffset"></div>
+                <h3 class="centered">Calibration</h1> 
+                <p style="left:7%;width:86%;position:relative">You will hear a sound of someone rubbing their hands before their nose. In order calibrate the listening experience, please rub your hands before your nose and adjust the volume inside your headphones untill the volumes match.<br> <br> </p> 
+                <div class="centered" style="position:relative;height:30vh;left:10%;width:80%;background-color:hsl(180, 68%, 94%);">
+                    <div class="range-slider" style="top:5%;height:20%;width:90%;position:absolute;background-color:hsl(180, 68%, 90%);">
+                        <h4 class="centered sliderlabel"> volume </h4>
+                        <input class="range-slider__range centered" type="range" id="volume" min="0" max="2" value="1" list="gain-vals" step="0.01" data-action="volume">	
+                    </div>
+                    <div class="centered" style="top:33%;height:66%;position:absolute">
+                        <button id="calib_button" style="position:relative;" type="button" class="button" onclick="calibrationAudio.togglePlayback(this,3);">Play</button>
+                        <button type="button" class="button" onclick="stateSwitch('calib')">Continue</button>
+                    </div>
+                </div>
             </div>
-            <button id="calib_button" type="button" class="button" onclick="calibrationAudio.togglePlayback(this,3);">Play</button>
-            <button type="button" class="button" onclick="stateSwitch('calib')">Continue</button>
+            <!--------------- CALIBRATION ------------------->
+            
+            <div id="likert" class="invisible likert centered">
+                <div>
+                <div class="simpleoffset"></div>
+                    <h3 id="testTitle" class="centered">Hearing test</h3> 
+                    <p>How well can you distinguish the individual notes of the played instrument? </p>
+                    <div id="likertbuttons" style="display:contents;">
+                        <button id="likert_0_button" type="button" class="button buttonOff" onclick="likertButtonClicked(this, 0)">Not at all</button>
+                        <button id="likert_1_button" type="button" class="button buttonOff" onclick="likertButtonClicked(this, 1)">Poor</button>
+                        <button id="likert_2_button" type="button" class="button buttonOff" onclick="likertButtonClicked(this, 2)">Neutral</button>
+                        <button id="likert_3_button" type="button" class="button buttonOff" onclick="likertButtonClicked(this, 3)">Decent</button>
+                        <button id="likert_4_button" type="button" class="button buttonOff" onclick="likertButtonClicked(this, 4)">Very good</button>
+                    </div>
+                    <div style="display:block;margin-top:40px;">
+                        <!-- <button id="next_file_button" type="button" onclick="nextTest();" disabled="disabled"">Next sound</button> -->
+                        <button id="play_sound_button" type="button" class="button" onclick="instrument.togglePlayback(buffers, 3, true);ambience.togglePlayback(buffers, 3, true)">Stop sound</button>
+                        
+                        <audio id="likert_audio_control" class="invisible">
+                            Your browser does not support the audio element.
+                        </audio> 
+                        
+                        <!-- <button id="show_results" type="button" onclick="stateSwitch('show results')">Show results</button> -->
+                    </div>
+            </div>
+            </div>
+            <!---------------------- TEST ---------------------->
+            
+            <div id="results" class="invisible results">
+                <div class="simpleoffset"></div>
+                <h3 id="resultsTitle" class="centered">Results</h3>
+                <p class="centered">Results are shown on this graph. As of this moment we have not yet analyzed any incoming results from users, so nothing substantial can yet be concluded about the quality of this test.</p>
+                <div>
+                    <text id="how_to_change_text_in_html" class="topleftinbox invisible"></text>
+                    <div id="results_table" class="toprightinbox invisible">
+                    </div>
+                </div>
+                <canvas id="myChart" width="200" height="100" class="absolute">
+                    <p>Hello Fallback World</p>
+                </canvas>
+            </div>
+            <!--------------------- RESULTS -------------------->
         </div>
-    </div>
-	<div id="likert" class="invisible likert centered">
-		<div>
-			<p>How well can you distinguish the individual notes of the played instrument? </p>
-			<div id="likertbuttons" style="display:contents;">
-				<button id="likert_0_button" type="button" class="button buttonOff" onclick="likertButtonClicked(this, 0)">Not at all</button>
-				<button id="likert_1_button" type="button" class="button buttonOff" onclick="likertButtonClicked(this, 1)">Poor</button>
-				<button id="likert_2_button" type="button" class="button buttonOff" onclick="likertButtonClicked(this, 2)">Neutral</button>
-				<button id="likert_3_button" type="button" class="button buttonOff" onclick="likertButtonClicked(this, 3)">Decent</button>
-				<button id="likert_4_button" type="button" class="button buttonOff" onclick="likertButtonClicked(this, 4)">Very good</button>
-			</div>
-			<div style="display:block;margin-top:40px;">
-				<!-- <button id="next_file_button" type="button" onclick="nextTest();" disabled="disabled"">Next sound</button> -->
-				<button id="play_sound_button" type="button" class="button" onclick="instrument.togglePlayback(buffers, 3, true);ambience.togglePlayback(buffers, 3, true)">Stop sound</button>
-				
-				<audio id="likert_audio_control" class="invisible">
-				Your browser does not support the audio element.
-				</audio> 
-				
-				<!-- <button id="show_results" type="button" onclick="stateSwitch('show results')">Show results</button> -->
-			</div>
-		</div>
-	</div>
-	<div id="results" class="invisible results">
-		<div>
-			<text id="how_to_change_text_in_html" class="topleftinbox invisible"></text>
-			<div id="results_table" class="toprightinbox invisible">
-			</div>
-		</div>
-        <canvas id="myChart" width="200" height="100" class="absolute">
-			<p>Hello Fallback World</p>
-		</canvas>
-	</div>
-</body>
+    </body>
 </html>
