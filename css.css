@@ -1,7 +1,148 @@
 html, body {
-	height:100%;
-	font-size: 30px;
-	background-color:#dbf1ff;
+	margin: 0;
+    height: 100%;
+	background-color:hsl(180, 68%, 97%);/*#dbf1ff;*/
+}
+
+h1 {
+  display: block;
+  font-size: 1.6em;
+  margin-bottom: 0.3em;
+  margin-top: 0em;
+  font-weight: bold;
+  color: #004d4d;
+  text-shadow: 4px 1px #fff;
+}
+h2 {
+  display: block;
+  font-size: 1.26em;
+  margin-bottom: 0.2em;
+  margin-top: 0em;
+  color: gray;
+}
+h3 {
+  display: block;
+  font-size: 0.4em;
+  margin-bottom: 0.2em;
+  margin-top: 0em;
+  font-style: italic;
+}
+h4 {
+  display: block;
+  font-size: 0.3em;
+  margin-bottom: 0.15em;
+  margin-top: 0em;
+  font-style: italic;
+}
+h6 {
+  display: block;
+  font-size: 0.3em;
+  margin-bottom: 0.04em;
+  margin-top: 0em;
+  float: right;
+  color: rgb(14, 14, 14);
+}
+p {
+    font-size:1.54vw;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    color: #fff
+}
+
+.vl {
+  background-color: #fff;
+  background-clip: content-box;
+  width: 2px;
+  height:40%;
+  position:relative;
+}
+
+.centered {
+	text-align:center;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.maininhoud {
+    left: 15%;
+    top: 2.5%;
+    width:70%;
+    height:95%;
+    position: relative;
+}
+
+.title {
+  font-size: 3vw;
+  font-weight: bold;
+  color: rgb(22, 25, 29);
+  text-shadow: 1% 1% #2a3038;
+  width: 50%;
+  left: 3%;
+  margin: 0 auto;
+}
+
+.navbartext {
+    font-size:0.9vw;
+    height:100%;
+    padding-right:1vw;
+    padding-left:1vw;
+}
+
+.navbartextspace {
+    right:1px;
+    width:40vw;
+}
+
+.navbar {
+    top: 0;
+    color: #009999;
+    position: relative;
+    height:75px;
+    /*min-height: 150px;*/
+    background-color: rgb(97, 200, 207);
+    width: 100%;
+}
+
+
+@media only screen and (min-height: 1100px) {
+  .navbar  {
+    height:6.8%;
+  }
+  p {
+    font-size: 31px;
+  }
+}
+@media only screen and (max-width: 500px) {
+  .navbar  {
+    /*height:19.8%;*/
+    height:39.6;
+  }
+  .title {
+      left: 0%;
+      height: 50%;
+      width: 90%;
+      position: relative;
+      font-size: 16px;
+  }
+  .navbartext {
+    height: 50%;
+    font-size: 8.7px;
+    margin-right: 4px;
+    width:50%;
+  }
+  .navbartextspace {
+    height: 50%;
+    width: 90%;
+  }
+  .centered {
+    justify-content: center;
+	align-items: center;
+  }
+  p {
+    font-size:3.2vw;
+  }
 }
 
 .buttonOff {
@@ -111,13 +252,6 @@ button {
 	font-size: 23px;
 }
 
-.centered {
-	text-align:center;
-	display: flex;
-	justify-content: center;
-	align-items: center;
-}
-
 .absolute {
 	height: 100%;
 	position: absolute;
@@ -222,11 +356,11 @@ button {
 }
 body {
   font-family: sans-serif;
-  padding: 60px 20px;
+  padding: 0px 0px;
 }
 @media (min-width: 600px) {
   body {
-    padding: 60px;
+    padding: 0px;
   }
 }
 .range-slider {
