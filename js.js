@@ -114,6 +114,10 @@ $(window).resize( function(){
   }
 });
 
+$(window).mousedown( function(){
+    mouseClicked();
+})
+
 // switch between document states of the test (hoe werkt dit bij andere websites?)
 function stateSwitch(e) {
 	var divs = document.getElementsByTagName('div');

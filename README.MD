@@ -1,4 +1,5 @@
 #TODO
+
 ## Bugs
-- iPhone won't load audiofiles.
+* iPhone won't load audiofiles.
 ## Features
