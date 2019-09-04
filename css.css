@@ -155,7 +155,25 @@ h1, h2, h3, h4, h5, h6 {
         font-size: 1.14vw;
     }
 }
-@media only screen and (max-width: 760px) {
+@media only screen and (max-width: 760px)
+/* ----------- iPhone X ----------- */
+/* Portrait and Landscape */
+    or ( only screen 
+  and (min-device-width: 375px) 
+  and (max-device-width: 812px) 
+  and (-webkit-min-device-pixel-ratio: 3) )
+  /* Portrait */
+    or ( only screen 
+  and (min-device-width: 375px) 
+  and (max-device-width: 812px) 
+  and (-webkit-min-device-pixel-ratio: 3)
+  and (orientation: portrait) )
+  /* Landscape */
+    or ( only screen 
+  and (min-device-width: 375px) 
+  and (max-device-width: 812px) 
+  and (-webkit-min-device-pixel-ratio: 3)
+  and (orientation: landscape) ) {
     .navbar  {
         height:39.6;
     }
