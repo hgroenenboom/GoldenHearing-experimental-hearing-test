@@ -134,7 +134,7 @@ h1, h2, h3, h4, h5, h6 {
     p {
     }
 }
-@media only screen and (min-width: 760px) {
+@media only screen and (min-width: 768px) {
     .range-slider__range {
         left:15%;
         width:80%;
@@ -155,7 +155,7 @@ h1, h2, h3, h4, h5, h6 {
         font-size: 1.14vw;
     }
 }
-@media only screen and (max-width: 760px)
+@media only screen and (max-width: 768px)
 /* ----------- iPhone X ----------- */
 /* Portrait and Landscape */
     or ( only screen 
