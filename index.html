@@ -8,7 +8,6 @@
         
         <link rel="stylesheet" href="css.css?version=420">
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-        <script src="Chart.bundle.js"></script>
         <script src="Chart.bundle.min.js"></script>
         <script src="https://d3js.org/d3.v5.js"></script>
         <script src='https://d3js.org/d3.v4.min.js'></script>
@@ -22,7 +21,7 @@
             <div id='navbar-topright' class="centered navbartextspace">
                 <h6 class="centered navbartext" style="float:left;"> 
                     by&nbsp;
-                    <a href="http://haroldgroenenboom.nl/" target="_blank">Harold Groenenboom</a> 
+                    <a href="https://www.haroldgroenenboom.nl/" target="_blank">Harold Groenenboom</a> 
                     &nbsp;&amp;&nbsp;
                     <a target="_blank">Nick Verbeek</a> 
                 </h6> 
@@ -36,7 +35,7 @@
             </div>
             <div id='navbar-topleft' class="" style="left:1px; width:19vw">
                 <h6 class=" navbartext" style="float:left;"> 
-                    v 1.2.1
+                    v1.3
                 </h6>
             </div>
         </div>
@@ -46,7 +45,7 @@
             <div id="startscreen" class="visible">
                 <div id="intro" style="height=100%">
                     <div class="maininhoud">
-                        <p id="startscreen_dynamicText" style="color:Red;" onclick="stateSwitch()">Please wait till all sounds have been loaded</p>
+                        <p id="startscreen_dynamicText" style="color:Red;" onclick="switchPage()">Please wait till all sounds have been loaded</p>
                         <p>This experimental test will test your <i>temporal resolution</i>
                             Consecutive instrument notes will be played in a rapid succession. You have to answer how well you can distinguish these individual notes.
                             At the end of the test you will get an indication on how well you can distinguish sounds on different playback frequencies. Results of this test should be combined with results from accurate Temporal Resolution tests. With this combined information we hope to gain more insight on the impact of temporal hearing loss.<br><br>
@@ -69,7 +68,7 @@
                     </div>
                     <div class="centered" style="top:33%;height:66%;position:absolute">
                         <button id="calib_button" style="position:relative;" type="button" class="button" onmousedown="calibrationAudio.togglePlayback(this,3);">Play</button>
-                        <button type="button" class="button" onclick="stateSwitch('calib')">Continue</button>
+                        <button type="button" class="button" onclick="switchPage('calib')">Continue</button>
                     </div>
                 </div>
             </div>
@@ -95,7 +94,7 @@
                             Your browser does not support the audio element.
                         </audio> 
                         
-                        <!-- <button id="show_results" type="button" onclick="stateSwitch('show results')">Show results</button> -->
+                        <!-- <button id="show_results" type="button" onclick="switchPage('show results')">Show results</button> -->
                     </div>
                 </div>
             </div>

@@ -3,46 +3,47 @@
 // - Chart.js
 // - d3
 
-// Version
-console.log("v 1.2");
+// Constants / Settings
+const pages = ["startscreen", "calibration", "likert", "results"];
+const likertList = ["Not at all", "Slightly", "Moderately", "Very", "Extremely"];
 
-// get audiocontext (WebAudio)
+// Audio
 const AudioContext = window.AudioContext || window.webkitAudioContext;
 const audioCtx = new AudioContext();
-
-// dsp modules
 const gainNode = audioCtx.createGain();
 
-// audio sources
-var instrumentPaths = [
-	// ["audio/Aestethics_3.mp3", "audio/mpeg"],
-	['https://hgroenenboom.github.io/HKU-Hearing-test/audio/samples/Piano_Original_1.wav'], 
-	// ['https://hgroenenboom.github.io/HKU-Hearing-test/audio/samples/Piano_TD10_Original_1.wav'], 
-	// ['https://hgroenenboom.github.io/HKU-Hearing-test/audio/samples/Piano_TD5_Original_1.wav'], 
-	['https://hgroenenboom.github.io/HKU-Hearing-test/audio/samples/Snare_Original_1.wav'], 
-	// ['https://hgroenenboom.github.io/HKU-Hearing-test/audio/samples/Snare_td10_Original_1.wav'], 
-	// ['https://hgroenenboom.github.io/HKU-Hearing-test/audio/samples/Snare_td5_Original_1.wav'], 
-	['https://hgroenenboom.github.io/HKU-Hearing-test/audio/samples/woodblock_Original_1.wav'], 
-	// ['https://hgroenenboom.github.io/HKU-Hearing-test/audio/samples/woodblock_td10_Original_1.wav'], 
-	// ['https://hgroenenboom.github.io/HKU-Hearing-test/audio/samples/woodblock_td5_Original_1.wav']
-];
-var ambiencePaths = [
-	//["https://hgroenenboom.github.io/hku-hearing-test/audio/aestethics_3.mp3", "audio/wav", "audio/mpeg"], 
-	//["https://hgroenenboom.github.io/hku-hearing-test/audio/aestethics_3_h.mp3", "audio/mp3"],
-	// ['https://hgroenenboom.github.io/HKU-Hearing-test/audio/samples/Backgrounds/162765__dorhel__symphony-orchestra-tuning-before-concert.wav'], 
-	// ['https://hgroenenboom.github.io/HKU-Hearing-test/audio/samples/Backgrounds/214993__4team__ambient-sound-inside-cafe-dining.wav'], 
-	// ['https://hgroenenboom.github.io/HKU-Hearing-test/audio/samples/Backgrounds/191350__malupeeters__traffic-mel-1.wav'], 
-    ['https://hgroenenboom.github.io/HKU-Hearing-test/audio/samples/Backgrounds/orchestra.wav'], 
-	['https://hgroenenboom.github.io/HKU-Hearing-test/audio/samples/Backgrounds/party.wav'], 
-	['https://hgroenenboom.github.io/HKU-Hearing-test/audio/samples/Backgrounds/traffic.wav'], 
-	// ['https://hgroenenboom.github.io/HKU-Hearing-test/audio/samples/Backgrounds/387548__mikikroom__city-milano-traffic-whistle-moto.wav']
-];
-var buffers = [];
+// Loaded AudioBuffers
+let buffers = [];
 
-// for debugging: only generates one audio settings
-//instrumentPaths = [instrumentPaths[0]];
-//ambiencePaths = [ambiencePaths[0]];
-//ambiencePaths = [];
+// Audio URL sources
+const instrumentPaths = [
+	// ["audio/Aestethics_3.mp3", "audio/mpeg"],
+	['/audio/samples/Piano_Original_1.wav'], 
+	// ['/audio/samples/Piano_TD10_Original_1.wav'], 
+	// ['/audio/samples/Piano_TD5_Original_1.wav'], 
+	['/audio/samples/Snare_Original_1.wav'], 
+	// ['/audio/samples/Snare_td10_Original_1.wav'], 
+	// ['/audio/samples/Snare_td5_Original_1.wav'], 
+	['/audio/samples/woodblock_Original_1.wav'], 
+	// ['/audio/samples/woodblock_td10_Original_1.wav'], 
+	// ['/audio/samples/woodblock_td5_Original_1.wav']
+];
+const ambiencePaths = [
+	//["/audio/aestethics_3.mp3", "audio/wav", "audio/mpeg"], 
+	//["/audio/aestethics_3_h.mp3", "audio/mp3"],
+	// ['/audio/samples/Backgrounds/162765__dorhel__symphony-orchestra-tuning-before-concert.wav'], 
+	// ['/audio/samples/Backgrounds/214993__4team__ambient-sound-inside-cafe-dining.wav'], 
+	// ['/audio/samples/Backgrounds/191350__malupeeters__traffic-mel-1.wav'], 
+    ['/audio/samples/Backgrounds/orchestra.wav'], 
+	['/audio/samples/Backgrounds/party.wav'], 
+	['/audio/samples/Backgrounds/traffic.wav'], 
+	// ['/audio/samples/Backgrounds/387548__mikikroom__city-milano-traffic-whistle-moto.wav']
+];
+
+// Debugging: only generates one audio settings
+// instrumentPaths = [instrumentPaths[0]];
+// ambiencePaths = [ambiencePaths[0]];
+// ambiencePaths = [];
 
 // variables used for saving all results
 var numResults = 0;
@@ -52,24 +53,27 @@ var chosenAudio = 0;
 
 var instrument = new Sound(0);
 var ambience = new Sound(1);
-var calibBuffer = null;
 var calibrationAudio = null;
-var isAllAudioLoaded = false;
-var state = 0;
-var pages = ["startscreen", "calibration", "likert", "results"];
 
-// actual values used inside the test
+// Website state
+var allAudioFilesLoaded = false;
+var currentPage = 0;
+
+// List of all playback rate frequencies used inside the test
 // the amount of values is a multiplication of the number of samples and the amount of random number generated
-var maxFrequency = 60;
-var startFrequency = 15;
-var randomGrabber = [];
-for(var i = 0; i < 10; i++) {
-	var freq = startFrequency+(maxFrequency-startFrequency)/9*i;
-	for(var j = 0; j < instrumentPaths.length; j++) {
-		randomGrabber.push([freq, j]); 
+const maximumFrequency = 60;
+const minimumFrequency = 15;
+let __availableFrequencies = [];
+for(let i = 0; i < 10; i++) 
+{
+	const freq = minimumFrequency + (maximumFrequency - minimumFrequency) / 9 * i;
+
+	for(let j = 0; j < instrumentPaths.length; j++) 
+	{
+		__availableFrequencies.push([freq, j]); 
 	}
 }
-randomGrabber = d3.shuffle(randomGrabber);
+const availableFrequencies = d3.shuffle(__availableFrequencies);
 
 
 /*--------------------------------------------------------------------------------------------*/
@@ -77,112 +81,115 @@ randomGrabber = d3.shuffle(randomGrabber);
 
 // handle all keyboard input (a bit chaotic still)
 var keys = {};
-window.onkeyup = function(e) { keys[e.keyCode] = false; }
 function handleInput(e) {
-    console.log(e.keyCode);
     keys[e.keyCode] = true;
-    if(e.keyCode == 32 || true || e == "mouseclick") {
-        if(pages[state] == 'startscreen') {
-            stateSwitch(e);
-        }
-    }
-    if( ((e.keyCode >= 48 && e.keyCode <= 57) || (e.keyCode >= 96 && e.keyCode <= 105) ) && pages[state] == 'likert') {
-        console.log("likert pressed");
-        var key =  e.keyCode % 48;
+
+	if(pages[currentPage] == 'startscreen') {
+		switchPage(e);
+	}
+
+    if( pages[currentPage] == 'likert' && (e.keyCode >= 48 && e.keyCode <= 57) || (e.keyCode >= 96 && e.keyCode <= 105) ) {
+        const key =  e.keyCode % 48;
         
         if(key > 0 && key <= 5) {
-            var likertButtons = jQuery("#likertbuttons button");
-            likertButtons[key-1].click();
+            const likertButtons = jQuery("#likertbuttons button");
+            likertButtons[key - 1].click();
         }
     }
-    // enter
+
+    // Enter key
     if(e.keyCode == 13) {
         if(jQuery("#likert")[0].classList.contains("visible")) {
             nextTest();
         }
     }
-    // overload stateswitch with 'a'
-    if(e.keyCode == 65) {
-        stateSwitch("lol");
-    }
 }
 window.onkeydown = handleInput;
+window.onkeyup = function(e) { 
+	keys[e.keyCode] = false; 
+}
 
-$(window).resize( function(){
-  if(state == 3) {
-    drawGraph(results);
-  }
+$(window).resize( function() {
+	if(currentPage == 3) {
+		drawGraph(results);
+	}
 });
 
 $(window).mousedown( function(){
-    mouseClicked();
+    handleInput("mouseclick");
 })
 
-// switch between document states of the test (hoe werkt dit bij andere websites?)
-function stateSwitch(e) {
-	var divs = document.getElementsByTagName('div');
+// Switch between document states of the test
+// TODO: should just be seperate pages
+function switchPage(e) 
+{
+	if (!allAudioFilesLoaded || currentPage == pages.length) 
+	{
+		return;
+	}		
+		
+	const currentPageDiv = $("#" + pages[currentPage]);
 	
-    console.log("stateSwitch: " + pages[state]);
-	//console.log(document.getElementById("startscreen").classList.contains("visible"));
-    if(state!= pages.length && isAllAudioLoaded) {
-        if(document.getElementById(pages[state]).classList.contains("visible")) {
-            $("#"+pages[state]).addClass('invisible').removeClass("visible");
-            $("#"+pages[state+1]).addClass('visible').removeClass("invisible");
-            switch(pages[state]) {
-                case "calibration":
-                    calibrationAudio.togglePlayback(document.getElementById("calib_button"), 1);
-                    nextTest(true);
-                    break;
-                case "likert":
-                    drawTable();
-                    instrument.togglePlayback(buffers, 1);
-                    ambience.togglePlayback(buffers, 1);
-                    break;
-                case "startscreen":
-                    calibrationAudio.togglePlayback(document.getElementById("calib_button"), 2);
-                    break;
-            }
-            state++;
-        }
+	if(currentPageDiv.hasClass("visible")) 
+	{
+		const nextPage = $("#" + pages[currentPage + 1]);
+		
+		currentPageDiv.addClass('invisible').removeClass("visible");
+		nextPage.addClass('visible').removeClass("invisible");
+
+		switch (pages[currentPage]) 
+		{
+			case "calibration":
+				calibrationAudio.togglePlayback(document.getElementById("calib_button"), 1);
+				nextTest(true);
+				break;
+			case "likert":
+				drawTable();
+				instrument.togglePlayback(buffers, 1);
+				ambience.togglePlayback(buffers, 1);
+				break;
+			case "startscreen":
+				calibrationAudio.togglePlayback(document.getElementById("calib_button"), 2);
+				break;
+		}
+
+		currentPage++;
 	}
-    console.log("newstate: "+pages[state]); 
 }
 
-function mouseClicked() {
-    handleInput("mouseclick");
-}
-
-likertList = ["Not at all", "Slightly", "Moderately", "Very", "Extremely"];
-$(document).ready(function(){
+$(document).ready(function()
+{
 	jQuery("#startscreen_dynamicText")[0].innerHTML = "please wait till all audio has been loaded";
 	
-	var buttons = document.getElementsByTagName('button');
-	for(var i = 0; i < buttons.length; i++) {
-        if(buttons[i].classList.contains("buttonOn") || buttons[i].classList.contains("buttonOff")) {
-			var id = ""+buttons[i].id
+	const buttons = document.getElementsByTagName('button');
+	for(let i = 0; i < buttons.length; i++) 
+	{
+        if(buttons[i].classList.contains("buttonOn") || buttons[i].classList.contains("buttonOff")) 
+		{
+			const id = "" + buttons[i].id;
 			if(id.substring(0, 7) == "likert") {
-				buttons[i].innerHTML = likertList[buttons[i][8]*1];
+				buttons[i].innerHTML = likertList[buttons[i][8] * 1];
 			}
 		}
 	}
 	
-	// get all soundbuffers as soon as the document is loaded (why?)
-	var allPaths = instrumentPaths.concat(ambiencePaths);
-    paths = allPaths.push(["https://hgroenenboom.github.io/HKU-Hearing-test/audio/calibrationFile.ogg"]);
-	buffers = getSoundBuffers(allPaths, true);
+	// Get all soundbuffers as soon as the document is loaded
+	let allAudioFiles = instrumentPaths.concat(ambiencePaths);
+    allAudioFiles.push(["/audio/calibrationFile.ogg"]);
+
+	buffers = downloadAudioBuffers(allAudioFiles);
 });
 
-// starts after all sounds are loaded
-function documentReadyPart2() {
-    calibBuffer = buffers[buffers.length-1];
+function soundsLoadedCallback() {
+    const calibBuffer = buffers[buffers.length - 1];
+	calibrationAudio = new SimpleSound(calibBuffer);
+
     buffers.pop();
-    console.log([calibBuffer]);
-    console.log(buffers);
     
 	jQuery("#startscreen_dynamicText")[0].innerHTML = "Press any button or tap/click screen to continue";
     jQuery("#startscreen_dynamicText")[0].style.color = "Blue";
 	
-	// initiate audio elements
+	// Configure audio HTML element
     audioElement = document.querySelector("audio");
 	const track = audioCtx.createMediaElementSource(audioElement);
 	const volumeControl = document.querySelector('[data-action="volume"]');
@@ -191,99 +198,80 @@ function documentReadyPart2() {
 	}, false);
 	track.connect(gainNode).connect(audioCtx.destination);
 	
-    calibrationAudio = new SimpleSound(calibBuffer);
-	// start audio - necessary?
+	// Start audio - TODO: is this necessary?
 	audioCtx.resume();
 }
 
-// functions returns audioBuffers (WebAudio) by getting html's to audio files.
-function getSoundBuffers(soundPaths, shouldWaitTillDone = false) {
-	let localBuf = [];
-    let loadingProcessIdentifiers = [];
-    let loadingProcess = 0;
-	let isDone = [];
+// Obtain AudioBuffers from URLs to audio files.
+function downloadAudioBuffers(urls) 
+{
+	let outputBufferArray = [];
+
+	const progressHtmlId = "audioLoadingProcess";
+	if( document.getElementById(progressHtmlId) === null ) 
+	{
+		$( "<div id='" + progressHtmlId + "' class='centered bottomhalf'></div> " ).appendTo( jQuery("#startscreen_dynamicText") );
+	} 
+
+    let urlNames = [];
+    let loadingProgress = [];
+	let numDone = 0;
     
-	for(var i = 0; i < soundPaths.length; i++) {
-		isDone.push(false);
-        loadingProcessIdentifiers[i] = soundPaths[i][0];
+	for(let i = 0; i < urls.length; i++) 
+	{
+        urlNames[i] = urls[i][0];
 		
 		let request = new XMLHttpRequest();
-		request.open('GET', soundPaths[i][0], true);
+		request.open('GET', urls[i][0], true);
 		request.responseType = 'arraybuffer';
 		
-		let showProcess = function (e) {	
-			// console.log("inside showprocess with e.loaded: "+e.loaded / e.total * 100 / (instrumentPaths.length*2));
-			//console.log("original url = "+e.srcElement.responseURL);
-			let n = loadingProcessIdentifiers.indexOf(e.srcElement.responseURL);
-			//console.log("n = "+n);
+		function showProcess(e) 
+		{	
+			const urlIndex = urlNames.indexOf(e.srcElement.responseURL);
 			
-			let text = "audioLoadingProcess";
-			if( document.getElementById(text) == null ) {
-				$( "<div id='"+text+"' class='centered bottomhalf'></div> " ).appendTo( jQuery("#startscreen_dynamicText") );
-			} 
+			// Update loadingProgress array
+			const currentRequestLoadingProgress = e.loaded / e.total * 100 / (2 * instrumentPaths.length);
+			loadingProgress[urlIndex] = currentRequestLoadingProgress != NaN ? currentRequestLoadingProgress : 0;
 			
-			let val = e.loaded / e.total * 100 / (instrumentPaths.length*2);
-			if(val != NaN) {loadingProcess[n] = val;} else {loadingProcess[n] = 0;}
-			// console.log("inside showprocess with loadingprocess: " + loadingProcess);
-			
-			let total = 0
-			for(var j = 0; j < loadingProcess.length; j++) {
-				total += loadingProcess[j];
-			}
-			document.getElementById(text).innerHTML = "loading: "+total+"%";
+			const total = loadingProgress.reduce((a, b) => a + b, 0);
+			document.getElementById(progressHtmlId).innerHTML = "loading: " + total + "%";
 		}
 		
-        if(shouldWaitTillDone) {
-            request.addEventListener("load", function (e){ console.log("\trequest-load");showProcess(e); });
-		}
-        request.addEventListener("error", function (e) {console.log("\trequest-error");});
-		request.addEventListener("abort", function (e) {console.log("\trequest-abort");});
-		request.addEventListener("progress", showProcess);
-		
-		request.onload = function() {
-			let n = loadingProcessIdentifiers.indexOf(this.responseURL);
-            console.groupCollapsed(this.responseURL);
-			console.log("onload:------------------")
-            console.log(loadingProcessIdentifiers);
-            console.log("\tURL: "+this.responseURL);
-			console.log("\tn = "+n);
-			let audioData = this.response;
-			audioCtx.decodeAudioData(audioData, function(buffer) {
-				localBuf[n] = buffer;
-                console.log(localBuf[n]);
+		request.onload = function() 
+		{
+			console.groupCollapsed("HTMLRequest onLoad: " + this.responseURL);
+			
+			const urlIndex = urlNames.indexOf(this.responseURL);
+			const audioData = this.response;
+			audioCtx.decodeAudioData(audioData, function(buffer) 
+			{
+				outputBufferArray[urlIndex] = buffer;
                 
-                if(shouldWaitTillDone) {
-                console.log(isDone);
-                // check if all buffers are loaded
-                isDone[n] = true;
-                let allIsDone = true;
-                for(var a = 0; a < isDone.length; a++) {
-                    if(isDone[a] != true) { allIsDone = false; break; }
-                }
-                if(allIsDone ) { 
-                    console.log("allisloaded");
-                    let text = "audioLoadingProcess";
-                    document.getElementById(text).innerHTML = "";
-                    isAllAudioLoaded = true;
-                    documentReadyPart2(); 
-                };
-            }
-			}, function(e){
-				console.log("\taudiodata: "+audioData);
-				console.log("\tError with decoding audio data" + e.error);
-				console.log("\terror url = "+loadingProcessIdentifiers[n]); 
+				numDone++;
+				if(numDone < urls.length)
+				{
+					return;
+				}
+
+				console.log("all files loaded!");
+				document.getElementById("audioLoadingProcess").innerHTML = "";
+				allAudioFilesLoaded = true;
+				soundsLoadedCallback(); 
+			}, function(e) {
+				console.log("\tError while decoding audio data: '" + e.error); 
             });
 			
             console.groupEnd();
 		}
+        request.addEventListener("error", function (e) {console.log("\trequest-error" + e);});
+		request.addEventListener("abort", function (e) {console.log("\trequest-abort" + e);});
+		request.addEventListener("progress", showProcess);
+		request.addEventListener("load", showProcess );
+
 		request.send();
 	}
 	
-	console.log("loadingProcessIdentifiers: ");
-	console.log(loadingProcessIdentifiers);
-    console.log("soundPaths: ");
-	console.log(soundPaths);
-	return localBuf;
+	return outputBufferArray;
 }
 
 function likertButtonClicked(e, buttonnum) {
@@ -313,7 +301,7 @@ function resetAllToggleableButtons() {
 }
 
 // generate next test data
-var counter = 0; // counts through the randomGrabber
+var counter = 0; // counts through the availableFrequencies
 function nextTest(override = false) {
 	// override toggle can make sure a new sound file is generated even if no rating is selected yet.
 	var buttons = document.getElementsByTagName('button');
@@ -333,20 +321,20 @@ function nextTest(override = false) {
 	}
 	if(isAButtonToggled || override) {
 		// random audio and soundfile
-		instrument.frequency = randomGrabber[counter][0];
-		chosenAudio = randomGrabber[counter][1];
+		instrument.frequency = availableFrequencies[counter][0];
+		chosenAudio = availableFrequencies[counter][1];
 		instrument.selectedAudio = chosenAudio;
 		ambience.selectedAudio = chosenAudio;
 		
-		counter++; counter %= randomGrabber.length;
+		counter++; counter %= availableFrequencies.length;
 		instrument.play(buffers);
 		ambience.play(buffers);
 		console.log(""+instrument.frequency+ " - " +chosenAudio);
 	}
-    jQuery("#testTitle")[0].innerHTML = "Hearing test ("+numResults+"/"+randomGrabber.length+")";
+    jQuery("#testTitle")[0].innerHTML = "Hearing test ("+numResults+"/"+availableFrequencies.length+")";
 	
-	if(results.length >= randomGrabber.length) {
-		stateSwitch("show results");
+	if(results.length >= availableFrequencies.length) {
+		switchPage("show results");
 	}
 }
 
@@ -549,11 +537,11 @@ function drawGraph(dat) {
 	}
 	
 	var getAveraged = function(data) {
-		var freqRange = maxFrequency-startFrequency;
+		var freqRange = maximumFrequency-minimumFrequency;
 		var freqIncr = freqRange / accuracy;
 		newData = [];
 		for(var v = 0; v < accuracy; v++) {
-			var freq = startFrequency+0.5*freqIncr*(v+1);
+			var freq = minimumFrequency+0.5*freqIncr*(v+1);
 			count = 0;
 			addedResults = 0;
 			for(var i = 0; i < data.length; i++) {
@@ -580,8 +568,8 @@ function drawGraph(dat) {
 	
 	lab = [];
 	for(var i = 0; i < accuracy; i++) {
-		var freqIncr = (maxFrequency-startFrequency)/(accuracy-1);
-		lab.push(startFrequency+freqIncr*i);
+		var freqIncr = (maximumFrequency-minimumFrequency)/(accuracy-1);
+		lab.push(minimumFrequency+freqIncr*i);
 	}
 	console.log(lab);
 	
