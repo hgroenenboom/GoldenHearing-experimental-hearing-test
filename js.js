@@ -17,27 +17,20 @@ let buffers = [];
 
 // Audio URL sources
 const instrumentPaths = [
-	// ["audio/Aestethics_3.mp3", "audio/mpeg"],
 	['/audio/samples/Piano_Original_1.wav'], 
-	// ['/audio/samples/Piano_TD10_Original_1.wav'], 
-	// ['/audio/samples/Piano_TD5_Original_1.wav'], 
+	['/audio/samples/Piano_TD10_Original_1.wav'], 
+	['/audio/samples/Piano_TD5_Original_1.wav'], 
 	['/audio/samples/Snare_Original_1.wav'], 
-	// ['/audio/samples/Snare_td10_Original_1.wav'], 
-	// ['/audio/samples/Snare_td5_Original_1.wav'], 
+	['/audio/samples/Snare_td10_Original_1.wav'], 
+	['/audio/samples/Snare_td5_Original_1.wav'], 
 	['/audio/samples/woodblock_Original_1.wav'], 
-	// ['/audio/samples/woodblock_td10_Original_1.wav'], 
-	// ['/audio/samples/woodblock_td5_Original_1.wav']
+	['/audio/samples/woodblock_td10_Original_1.wav'], 
+	['/audio/samples/woodblock_td5_Original_1.wav']
 ];
 const ambiencePaths = [
-	//["/audio/aestethics_3.mp3", "audio/wav", "audio/mpeg"], 
-	//["/audio/aestethics_3_h.mp3", "audio/mp3"],
-	// ['/audio/samples/Backgrounds/162765__dorhel__symphony-orchestra-tuning-before-concert.wav'], 
-	// ['/audio/samples/Backgrounds/214993__4team__ambient-sound-inside-cafe-dining.wav'], 
-	// ['/audio/samples/Backgrounds/191350__malupeeters__traffic-mel-1.wav'], 
     ['/audio/samples/Backgrounds/orchestra.wav'], 
 	['/audio/samples/Backgrounds/party.wav'], 
 	['/audio/samples/Backgrounds/traffic.wav'], 
-	// ['/audio/samples/Backgrounds/387548__mikikroom__city-milano-traffic-whistle-moto.wav']
 ];
 
 // Debugging: only generates one audio settings
