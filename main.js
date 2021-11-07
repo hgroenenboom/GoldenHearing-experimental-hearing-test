@@ -175,7 +175,6 @@ $(document).ready(function()
 
 function soundsLoadedCallback() 
 {
-	console.log(buffers);
     const calibBuffer = buffers[buffers.length - 1];
 	calibrationAudio = new SimpleSound(calibBuffer);
 
