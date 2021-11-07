@@ -17,20 +17,20 @@ let buffers = [];
 
 // Audio URL sources
 const instrumentPaths = [
-	['/audio/samples/Piano_Original_1.wav'], 
-	// ['/audio/samples/Piano_TD10_Original_1.wav'], 
-	['/audio/samples/Piano_TD5_Original_1.wav'], 
-	['/audio/samples/Snare_Original_1.wav'], 
-	// ['/audio/samples/Snare_td10_Original_1.wav'], 
-	['/audio/samples/Snare_td5_Original_1.wav'], 
-	['/audio/samples/woodblock_Original_1.wav'], 
-	// ['/audio/samples/woodblock_td10_Original_1.wav'], 
-	['/audio/samples/woodblock_td5_Original_1.wav']
+	['audio/samples/Piano_Original_1.wav'], 
+	// ['audio/samples/Piano_TD10_Original_1.wav'], 
+	['audio/samples/Piano_TD5_Original_1.wav'], 
+	['audio/samples/Snare_Original_1.wav'], 
+	// ['audio/samples/Snare_td10_Original_1.wav'], 
+	['audio/samples/Snare_td5_Original_1.wav'], 
+	['audio/samples/woodblock_Original_1.wav'], 
+	// ['audio/samples/woodblock_td10_Original_1.wav'], 
+	['audio/samples/woodblock_td5_Original_1.wav']
 ];
 const ambiencePaths = [
-	['/audio/samples/Backgrounds/orchestra.wav'], 
-	['/audio/samples/Backgrounds/party.wav'], 
-	// ['/audio/samples/Backgrounds/traffic.wav'], 
+	['audio/samples/Backgrounds/orchestra.wav'], 
+	['audio/samples/Backgrounds/party.wav'], 
+	// ['audio/samples/Backgrounds/traffic.wav'], 
 ];
 
 // Debugging: only generates one audio settings
@@ -168,7 +168,7 @@ $(document).ready(function()
 	
 	// Get all soundbuffers as soon as the document is loaded
 	let allAudioFiles = instrumentPaths.concat(ambiencePaths);
-    allAudioFiles.push(["/audio/calibrationFile.ogg"]);
+    allAudioFiles.push(["audio/calibrationFile.ogg"]);
 
 	downloadAudioBuffers(allAudioFiles);
 });
@@ -210,7 +210,7 @@ function downloadAudioBuffers(urls)
 	for(let i = 0; i < urls.length; i++) 
 	{
 		let request = new XMLHttpRequest();
-		request.open('GET', urls[i][0], true);
+		request.open('GET', window.location.href + "/" + urls[i][0], true);
 		request.responseType = 'arraybuffer';
 		
 		function showProcess(e) 
