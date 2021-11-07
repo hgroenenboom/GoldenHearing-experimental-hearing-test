@@ -40,9 +40,8 @@ const ambiencePaths = [
 
 // variables used for saving all results
 var numResults = 0;
-var activeButtonNum = null; // currently active likert button
+var currentLikertButton = null;
 var results = []; 
-var chosenAudio = 0;
 
 var instrument = new Sound(0);
 var ambience = new Sound(1);
@@ -54,12 +53,13 @@ var currentPage = 0;
 
 // List of all playback rate frequencies used inside the test
 // the amount of values is a multiplication of the number of samples and the amount of random number generated
+const numberOfFrequencyVariations = 5;
 const maximumFrequency = 60;
 const minimumFrequency = 15;
 let __availableFrequencies = [];
-for(let i = 0; i < 10; i++) 
+for(let i = 0; i < numberOfFrequencyVariations; i++) 
 {
-	const freq = minimumFrequency + (maximumFrequency - minimumFrequency) / 9 * i;
+	const freq = minimumFrequency + (maximumFrequency - minimumFrequency) / (numberOfFrequencyVariations - 1) * i;
 
 	for(let j = 0; j < instrumentPaths.length; j++) 
 	{
@@ -170,10 +170,12 @@ $(document).ready(function()
 	let allAudioFiles = instrumentPaths.concat(ambiencePaths);
     allAudioFiles.push(["/audio/calibrationFile.ogg"]);
 
-	buffers = downloadAudioBuffers(allAudioFiles);
+	downloadAudioBuffers(allAudioFiles);
 });
 
-function soundsLoadedCallback() {
+function soundsLoadedCallback() 
+{
+	console.log(buffers);
     const calibBuffer = buffers[buffers.length - 1];
 	calibrationAudio = new SimpleSound(calibBuffer);
 
@@ -195,36 +197,28 @@ function soundsLoadedCallback() {
 	audioCtx.resume();
 }
 
-// Obtain AudioBuffers from URLs to audio files.
 function downloadAudioBuffers(urls) 
 {
-	let outputBufferArray = [];
-
 	const progressHtmlId = "audioLoadingProcess";
 	if( document.getElementById(progressHtmlId) === null ) 
 	{
 		$( "<div id='" + progressHtmlId + "' class='centered bottomhalf'></div> " ).appendTo( jQuery("#startscreen_dynamicText") );
 	} 
 
-    let urlNames = [];
     let loadingProgress = [];
 	let numDone = 0;
     
 	for(let i = 0; i < urls.length; i++) 
 	{
-        urlNames[i] = urls[i][0];
-		
 		let request = new XMLHttpRequest();
 		request.open('GET', urls[i][0], true);
 		request.responseType = 'arraybuffer';
 		
 		function showProcess(e) 
 		{	
-			const urlIndex = urlNames.indexOf(e.srcElement.responseURL);
-			
 			// Update loadingProgress array
 			const currentRequestLoadingProgress = e.loaded / e.total * 100 / (2 * instrumentPaths.length);
-			loadingProgress[urlIndex] = currentRequestLoadingProgress != NaN ? currentRequestLoadingProgress : 0;
+			loadingProgress[i] = currentRequestLoadingProgress != NaN ? currentRequestLoadingProgress : 0;
 			
 			const total = loadingProgress.reduce((a, b) => a + b, 0);
 			document.getElementById(progressHtmlId).innerHTML = "loading: " + total + "%";
@@ -234,11 +228,11 @@ function downloadAudioBuffers(urls)
 		{
 			console.groupCollapsed("HTMLRequest onLoad: " + this.responseURL);
 			
-			const urlIndex = urlNames.indexOf(this.responseURL);
+			const urlIndex = i;
 			const audioData = this.response;
 			audioCtx.decodeAudioData(audioData, function(buffer) 
 			{
-				outputBufferArray[urlIndex] = buffer;
+				buffers[urlIndex] = buffer;
                 
 				numDone++;
 				if(numDone < urls.length)
@@ -263,173 +257,198 @@ function downloadAudioBuffers(urls)
 
 		request.send();
 	}
-	
-	return outputBufferArray;
 }
 
-function likertButtonClicked(e, buttonnum) {
-	if ( e.classList.contains("buttonOn")) {
+function resetAllToggleableButtons() 
+{
+	const buttons = document.getElementsByTagName('button');
+	for(let i = 0; i < buttons.length; i++) 
+	{
+		buttons[i].classList.add("buttonOff");
+		buttons[i].classList.remove("buttonOn");
+	}
+}
+
+function likertButtonClicked(e, buttonNumber) 
+{
+	if ( e.classList.contains("buttonOn")) 
+	{
 		resetAllToggleableButtons();
 		e.classList.add("buttonOff");
 		e.classList.remove("buttonOn");
-	} else {
-        activeButtonNum = buttonnum;
+	} 
+	else 
+	{
+        currentLikertButton = buttonNumber;
 		resetAllToggleableButtons();
 		e.classList.add("buttonOn");
 		e.classList.remove("buttonOff");
-		//document.getElementById("next_file_button").disabled = '';
+
 		nextTest();
 	}
 }
 
-function resetAllToggleableButtons() {
-	var buttons = document.getElementsByTagName('button');
-	for(var i = 0; i < buttons.length; i++) {
-        if(buttons[i].classList.contains("buttonOn")) {
-			buttons[i].classList.add("buttonOff");
-			buttons[i].classList.remove("buttonOn");
-        }
+let testCounter = 0;
+function nextTest(forceNewSound = false) 
+{
+	// forceNewSound makes sure a new sound file is generated even if no rating is yet selected.
+	if(forceNewSound)
+	{
+		console.groupCollapsed("Tests");
 	}
-	//document.getElementById("next_file_button").disabled = "disabled";
-}
 
-// generate next test data
-var counter = 0; // counts through the availableFrequencies
-function nextTest(override = false) {
-	// override toggle can make sure a new sound file is generated even if no rating is selected yet.
-	var buttons = document.getElementsByTagName('button');
-	var isAButtonToggled = false;
-    var activeButton = -1;
-	for(var i = 0; i < buttons.length; i++) {
-		if(buttons[i].id.includes("likert")) {
-			if(buttons[i].classList.contains("buttonOn")) {
-				isAButtonToggled = true;
-			}
+	const buttons = document.getElementsByTagName('button');
+	let likertButtonToggled = false;
+	for(let i = 0; i < buttons.length; i++) {
+		if(buttons[i].id.includes("likert") && buttons[i].classList.contains("buttonOn")) {
+			likertButtonToggled = true;
+			break;
 		}
 	}
-	if(isAButtonToggled) {
-        results.push([activeButtonNum, instrument.frequency, instrument.selectedAudio]);
+
+	if(likertButtonToggled) 
+	{
+        results.push([currentLikertButton, instrument.frequency, instrument.selectedAudio]);
         numResults++;
 		resetAllToggleableButtons();
 	}
-	if(isAButtonToggled || override) {
-		// random audio and soundfile
-		instrument.frequency = availableFrequencies[counter][0];
-		chosenAudio = availableFrequencies[counter][1];
-		instrument.selectedAudio = chosenAudio;
-		ambience.selectedAudio = chosenAudio;
+
+	// Select a new frequency and instrument and background sound file
+	if(likertButtonToggled || forceNewSound) 
+	{
+		instrument.frequency = availableFrequencies[testCounter][0];
+		const selectedAudioFile = availableFrequencies[testCounter][1];
+		instrument.selectedAudio = selectedAudioFile;
+		ambience.selectedAudio = selectedAudioFile;
 		
-		counter++; counter %= availableFrequencies.length;
+		console.log("New test: frequency=" + instrument.frequency + ", audioFile=" + selectedAudioFile);
 		instrument.play(buffers);
 		ambience.play(buffers);
-		console.log(""+instrument.frequency+ " - " +chosenAudio);
+		
+		testCounter++; 
+		testCounter %= availableFrequencies.length;
 	}
-    jQuery("#testTitle")[0].innerHTML = "Hearing test ("+numResults+"/"+availableFrequencies.length+")";
+
+    jQuery("#testTitle")[0].innerHTML = "Hearing test (" + numResults + "/" + availableFrequencies.length + ")";
 	
 	if(results.length >= availableFrequencies.length) {
+		console.groupEnd();
 		switchPage("show results");
 	}
 }
 
-function Sound(whichPartOfBuffer) { 
+function Sound(whichPartOfBuffer) 
+{ 
 	this.part = whichPartOfBuffer;
 	this.source = null;   
-	this.isplaying = false;
+	this.isPlaying = false;
 	this.frequency = null;
 	this.selectedAudio = 0;
 	
-    this.togglePlayback = function(buffers, mode=3, shouldLoop=false) {
-        // mode 1 = stop, mode 2 = start, mode 3 = toggle
-        var e = jQuery("#likert_audio_control")[0];
-		
-        //if(mode == 0) { e.currentTime=0; }
-        if(mode==2) {
-            this.play(buffers, shouldLoop);
+    this.togglePlayback = function(buffers, mode = 3, loop = false) 
+	{
+        // 1=stop, 2=start, 3=toggle
+        if(mode==2) 
+		{
+            this.play(buffers, loop);
             jQuery("#play_sound_button")[0].innerHTML = "Stop sound";
-        } else if (mode==1) {
-            this.stop(shouldLoop);
+        } 
+		else if (mode==1) 
+		{
+            this.stop(loop);
             jQuery("#play_sound_button")[0].innerHTML = "Start sound";
-        } else if (mode==3) {
-			if(this.isplaying) {
-				this.stop(shouldLoop);
-				jQuery("#play_sound_button")[0].innerHTML = "Start sound";
-			} else {
-				this.play(buffers, shouldLoop);
-				jQuery("#play_sound_button")[0].innerHTML = "Stop sound";
+        } 
+		else if (mode==3) 
+		{
+			if(this.isPlaying) 
+			{
+				this.stop(loop);
+			} 
+			else 
+			{
+				this.play(buffers, loop);
 			}
 		}
     }
 	
-	this.play = function(buffers, shouldLoop=true) {
+	this.play = function(buffers, loop = true) 
+	{
 		if(this.source) {this.source.stop();}
+		
 		this.source = audioCtx.createBufferSource();
-		console.log(this.selectedAudio + this.part*buffers.length*0.5);
-		this.source.buffer = buffers[this.selectedAudio + this.part*buffers.length*0.5];
-		// console.log(buffers);
-		this.source.loop = shouldLoop; 
+		this.source.buffer = buffers[this.selectedAudio + this.part * 0.5 * buffers.length];
+		this.source.loop = loop; 
 		if(this.frequency != null) {
 			this.source.loopEnd = 1 / this.frequency;
 		}
 		this.source.connect(gainNode).connect(audioCtx.destination);
 		this.source.start();
-		this.isplaying = true;
+		this.isPlaying = true;
+
+		jQuery("#play_sound_button")[0].innerHTML = "Stop sound";
 	}
 	
-	this.stop = function() {
+	this.stop = function() 
+	{
+		jQuery("#play_sound_button")[0].innerHTML = "Start sound";
 		this.source.stop();
-		this.isplaying = false;
+		this.isPlaying = false;
 	}
 }
 
-function SimpleSound(bufferToPlay, sl = true) {
-    console.groupCollapsed("SimpleSound created:");
-	this.buf = bufferToPlay;
-    console.log(this.buf);
-	this.src = null;   
-	this.isNowPlaying = false;
-    this.shouldLoop = sl;
-    console.groupEnd();
+function SimpleSound(audioBuffer, loop = true) 
+{
+	this.audiobuffer = audioBuffer;
+	this.source = null;   
+	this.isPlaying = false;
+    this.loop = loop;
 	
-    this.togglePlayback = function(e, mode=3) {
-        // mode 1 = stop, mode 2 = start, mode 3 = toggle
-        console.log(e);
-        console.log(mode);
+    this.togglePlayback = function(e, mode = 3) 
+	{
+        // 1=stop, 2=start, 3=toggle
         
-        if(mode==2) {
+        if(mode==2) 
+		{
             this.play();
             e.innerHTML = "Stop sound";
-        } else if (mode==1) {
+        } 
+		else if (mode==1) 
+		{
             this.stop();
             e.innerHTML = "Start sound";
-        } else if (mode==3) {
-			if(this.isNowPlaying) {
+        } 
+		else if (mode==3) 
+		{
+			if(this.isPlaying) 
+			{
 				this.stop();
 				e.innerHTML = "Start sound";
-			} else {
+			} 
+			else 
+			{
 				this.play();
 				e.innerHTML = "Stop sound";
 			}
 		}
     }
 	
-	this.play = function() {
-		if(this.src != null) {this.src.stop();}
-		this.src = audioCtx.createBufferSource();
-        console.log(this.src);
-        console.log(this.buf);
+	this.play = function() 
+	{
+		if(this.source != null) {this.source.stop();}
+		this.source = audioCtx.createBufferSource();
         
-        this.src.buffer = this.buf;
-		this.src.loop = this.shouldLoop; 
-        this.src.endLoop = this.buf.duration;
-		this.src.connect(gainNode).connect(audioCtx.destination);
-		this.src.start();
-		this.isNowPlaying = true;
+        this.source.buffer = this.audiobuffer;
+		this.source.loop = this.loop; 
+        this.source.endLoop = this.audiobuffer.duration;
+		this.source.connect(gainNode).connect(audioCtx.destination);
+		this.source.start();
+		this.isPlaying = true;
 	}
 	
-	this.stop = function() {
-		this.src.stop();
-		this.isNowPlaying = false;
-        console.log("isNowPlaying: "+ this.isNowPlaying);
+	this.stop = function() 
+	{
+		this.source.stop();
+		this.isPlaying = false;
 	}
 }
 
