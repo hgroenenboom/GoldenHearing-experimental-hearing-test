@@ -18,19 +18,19 @@ let buffers = [];
 // Audio URL sources
 const instrumentPaths = [
 	['/audio/samples/Piano_Original_1.wav'], 
-	['/audio/samples/Piano_TD10_Original_1.wav'], 
+	// ['/audio/samples/Piano_TD10_Original_1.wav'], 
 	['/audio/samples/Piano_TD5_Original_1.wav'], 
 	['/audio/samples/Snare_Original_1.wav'], 
-	['/audio/samples/Snare_td10_Original_1.wav'], 
+	// ['/audio/samples/Snare_td10_Original_1.wav'], 
 	['/audio/samples/Snare_td5_Original_1.wav'], 
 	['/audio/samples/woodblock_Original_1.wav'], 
-	['/audio/samples/woodblock_td10_Original_1.wav'], 
+	// ['/audio/samples/woodblock_td10_Original_1.wav'], 
 	['/audio/samples/woodblock_td5_Original_1.wav']
 ];
 const ambiencePaths = [
-    ['/audio/samples/Backgrounds/orchestra.wav'], 
+	['/audio/samples/Backgrounds/orchestra.wav'], 
 	['/audio/samples/Backgrounds/party.wav'], 
-	['/audio/samples/Backgrounds/traffic.wav'], 
+	// ['/audio/samples/Backgrounds/traffic.wav'], 
 ];
 
 // Debugging: only generates one audio settings
