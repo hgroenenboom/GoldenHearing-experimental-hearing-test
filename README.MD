@@ -1,7 +1,8 @@
-# Golden Hearing Experimental Hearing Test
-A mockup for a hearing test which tests the users temporal hearing loss. Created in collaboration with LUMC's Golden Hearing initiative. This test aims to research the value of everyday/musical sounds over 'laboratory-like' sounds as test sounds for hearing tests. 
+## Golden Hearing Experimental Hearing Test
 
-### Bugs
-* iPhone won't load audiofiles.
+This project features a mockup for a hearing test specifically designed to assess users' temporal hearing loss. Developed in collaboration with LUMC's Golden Hearing initiative, the test explores the potential value of everyday and musical sounds compared to more traditional 'laboratory-like' sounds for hearing assessments.
+
+**Known Issues:**
+- Audiofiles won't load on iPhone
 
 Created by Harold Groenenboom & Nick Verbeek
